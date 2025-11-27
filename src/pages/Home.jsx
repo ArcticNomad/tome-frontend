@@ -51,7 +51,7 @@ function Home() {
           
           {/* Bento Grid with subtle background */}
           <section className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-3xl -m-4" />
+            <div className="absolute inset-0 rounded-3xl -m-4" />
             <div className="relative z-10">
               <BentoGrid />
             </div>

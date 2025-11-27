@@ -5,13 +5,15 @@ import React from 'react';
 import { Facebook, Twitter, Instagram, Github, Mail } from 'lucide-react';
 
 const Footer = () => {
+
+
   return (
-    <footer className="mt-12 pt-8 border-t border-gray-100 bg-gray-50 px-4 md:px-8 lg:px-16 rounded-3xl">
+    <footer className="mt-12 pt-8 border-t border-gray-100 bg-stone-100 px-4 md:px-8 lg:px-16 rounded-3xl">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
         
         {/* Column 1: Brand & Bio */}
         <div className="md:col-span-1">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Omnible</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Tome</h3>
           <p className="text-sm text-gray-500 leading-relaxed">
             Your personal library tracker. Discover new worlds, track your reading journey, and join a community of book lovers.
           </p>
@@ -59,7 +61,7 @@ const Footer = () => {
       {/* Bottom Bar: Copyright & Socials */}
       <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-100">
         <p className="text-xs text-gray-400 mb-4 md:mb-0">
-          © {new Date().getFullYear()} Omnible Inc. All rights reserved.
+          © {new Date().getFullYear()} Tome Inc. All rights reserved.
         </p>
 
         <div className="flex gap-4">

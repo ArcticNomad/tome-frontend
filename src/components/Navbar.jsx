@@ -60,8 +60,8 @@ const Navbar = () => {
         {/* --- CENTER: LINKS --- */}
         <div className="hidden md:flex space-x-6 text-xs tracking-widest uppercase font-medium text-stone-500 absolute left-1/2 transform -translate-x-1/2">
           <a href="#" className="hover:text-stone-900 transition">Books</a>
-          <a href="#" className="hover:text-stone-900 transition">Writer</a>
-          <a href="#" className="hover:text-stone-900 transition">Articles</a>
+          <a href="#" className="hover:text-stone-900 transition">Tags</a>
+          <a href="#" className="hover:text-stone-900 transition">Reader</a>
         </div>
 
         {/* --- RIGHT: SEARCH + LOGIN + PROFILE --- */}
