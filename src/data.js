@@ -47,6 +47,13 @@ export const genreCollections = {
     { id: 302, title: "To Kill a Mockingbird", author: "Harper Lee", cover: "https://m.media-amazon.com/images/I/81gepf1eMqL._AC_UF1000,1000_QL80_.jpg" },
     { id: 303, title: "1984", author: "George Orwell", cover: "https://m.media-amazon.com/images/I/71kxa1-0mfL._AC_UF1000,1000_QL80_.jpg" },
     { id: 304, title: "Pride and Prejudice", author: "Jane Austen", cover: "https://m.media-amazon.com/images/I/71Q1tPupLFL._AC_UF1000,1000_QL80_.jpg" },
+     { id: 301, title: "The Great Gatsby", author: "F. Scott Fitzgerald", cover: "https://m.media-amazon.com/images/I/71FTb9X6wsL._AC_UF1000,1000_QL80_.jpg" },
+    { id: 302, title: "To Kill a Mockingbird", author: "Harper Lee", cover: "https://m.media-amazon.com/images/I/81gepf1eMqL._AC_UF1000,1000_QL80_.jpg" },
+ { id: 301, title: "The Great Gatsby", author: "F. Scott Fitzgerald", cover: "https://m.media-amazon.com/images/I/71FTb9X6wsL._AC_UF1000,1000_QL80_.jpg" },
+    { id: 302, title: "To Kill a Mockingbird", author: "Harper Lee", cover: "https://m.media-amazon.com/images/I/81gepf1eMqL._AC_UF1000,1000_QL80_.jpg" },
+ { id: 301, title: "The Great Gatsby", author: "F. Scott Fitzgerald", cover: "https://m.media-amazon.com/images/I/71FTb9X6wsL._AC_UF1000,1000_QL80_.jpg" },
+    { id: 302, title: "To Kill a Mockingbird", author: "Harper Lee", cover: "https://m.media-amazon.com/images/I/81gepf1eMqL._AC_UF1000,1000_QL80_.jpg" },
+
   ],
   "Sci-Fi": [
     { id: 401, title: "Dune", author: "Frank Herbert", cover: "https://m.media-amazon.com/images/I/81ym3QUd3KL._AC_UF1000,1000_QL80_.jpg" },
@@ -70,6 +77,12 @@ export const bestFiction = [
   { id: 602, title: "Life of Pi", author: "Yann Martel", cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=800", rating: 4.7 },
   { id: 603, title: "The Kite Runner", author: "Khaled Hosseini", cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=800", rating: 4.8 },
   { id: 604, title: "Beloved", author: "Toni Morrison", cover: "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?auto=format&fit=crop&q=80&w=800", rating: 4.6 },
+  { id: 601, title: "The Alchemist", author: "Paulo Coelho", cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800", rating: 4.9 },
+  { id: 602, title: "Life of Pi", author: "Yann Martel", cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=800", rating: 4.7 },
+  { id: 603, title: "The Kite Runner", author: "Khaled Hosseini", cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=800", rating: 4.8 },
+  { id: 601, title: "The Alchemist", author: "Paulo Coelho", cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800", rating: 4.9 },
+  { id: 602, title: "Life of Pi", author: "Yann Martel", cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=800", rating: 4.7 },
+  { id: 603, title: "The Kite Runner", author: "Khaled Hosseini", cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=800", rating: 4.8 },
 ];
 
 export const bestHistory = [
