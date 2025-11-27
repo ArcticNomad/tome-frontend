@@ -8,11 +8,26 @@
   ],
   "routes": [
     {
+      "src": "/api/:match*",
+      "dest": "https://[YOUR_RAILWAY_DOMAIN]/api/:match*"
+    },
+    {
       "handle": "filesystem"
     },
     {
       "src": "/.*",
       "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
     }
   ]
 }
