@@ -6,17 +6,14 @@
       "config": { "distDir": "dist" }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/:match*",
-      "dest": "https://tome-backend-production-643b.up.railway.app/api/:match*"
+      "source": "/api/:match*",
+      "destination": "https://tome-backend-production-643b.up.railway.app/api/:match*"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/.*",
-      "dest": "/index.html"
+      "source": "/:match*",
+      "destination": "/index.html"
     }
   ],
   "headers": [
