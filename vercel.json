@@ -9,7 +9,7 @@
   "routes": [
     {
       "src": "/api/:match*",
-      "dest": "https://[YOUR_RAILWAY_DOMAIN]/api/:match*"
+      "dest": "https://tome-backend-production-643b.up.railway.app/api/:match*"
     },
     {
       "handle": "filesystem"
