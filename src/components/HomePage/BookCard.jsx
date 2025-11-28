@@ -7,7 +7,31 @@ const BookCard = ({ book }) => {
   const [isLiked, setIsLiked] = useState(false);
 
   // Handle MongoDB data structure
-  const bookCover = book.coverImageUrl || '/placeholder-book.jpg';
+ // In your BookCard component
+const bookCover = ({ book }) => {
+  if (book.coverImageUrl) {
+    return (
+      <img 
+        src={book.coverImageUrl} 
+        alt={book.title} 
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        onError={(e) => {
+          e.target.style.display = 'none';
+          e.target.nextSibling.style.display = 'block';
+        }}
+      />
+    );
+  }
+  
+  return (
+    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+      <div className="text-center text-gray-500">
+        <BookOpen size={32} />
+        <p className="text-xs mt-2">No Cover</p>
+      </div>
+    </div>
+  );
+};
   const bookTitle = book.title || 'Untitled';
   const bookAuthor = book.author || 'Unknown Author';
   const bookId = book.gutenbergId || book._id;
