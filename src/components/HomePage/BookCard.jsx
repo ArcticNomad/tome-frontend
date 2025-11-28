@@ -7,7 +7,7 @@ const BookCard = ({ book }) => {
   const [isLiked, setIsLiked] = useState(false);
 
   // Handle MongoDB data structure
-  const bookCover = book.coverImageUrl || '/placeholder-book.jpg';
+ const bookCover = book.coverImageUrl || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450&fit=crop';
   const bookTitle = book.title || 'Untitled';
   const bookAuthor = book.author || 'Unknown Author';
   const bookId = book.gutenbergId || book._id;
@@ -22,16 +22,14 @@ const BookCard = ({ book }) => {
       {/* Cover Image Container */}
       <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-2 aspect-[2/3]">
         
-      // In your BookCard component
-<img 
-  src={book.coverImageUrl} 
-  alt={book.title} 
-  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-  onError={(e) => {
-    // Don't try to load placeholder if it doesn't exist
-    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDMwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iNDUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMjUgMTc1SDE3NVYyMjVIMTI1VjE3NVoiIGZpbGw9IiM5Q0EwQTYiLz4KPHRleHQgeD0iMTUwIiB5PSIyODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5Q0EwQTYiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCI+Tm8gQ292ZXI8L3RleHQ+Cjwvc3ZnPgo=';
-  }}
-/>
+        <img 
+          src={bookCover} 
+          alt={bookTitle} 
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            e.target.src = '/placeholder-book.jpg';
+          }}
+        />
 
         {/* Status Badge based on download count */}
         {downloadCount > 50000 && (
