@@ -26,9 +26,6 @@ const BookCard = ({ book }) => {
           src={bookCover} 
           alt={bookTitle} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={(e) => {
-            e.target.src = '/placeholder-book.jpg';
-          }}
         />
 
         {/* Status Badge based on download count */}
