@@ -7,7 +7,7 @@ import BentoGrid from '../components/HomePage/BentoGrid';
 import { standardBooks, genreCollections, bestHistory } from '../data'; 
 import HorizontalCarousel from '../components/HomePage/HorizontalCarousel';
 import Footer from '../components/HomePage/Footer';
-import useBookData from '../hooks/useBookData';
+import { useBookData } from '../hooks/useBookData';
 
 function Home() {
   const [activeGenre, setActiveGenre] = useState('Fiction');
@@ -81,7 +81,7 @@ function Home() {
           <section className="relative">
             <div className="absolute inset-0 rounded-3xl -m-4" />
             <div className="relative z-10">
-              <BentoGrid />
+             <BentoGrid featuredBooks={mainBookList.slice(0, 8)} /> // Show first 8 books as featured
             </div>
           </section>
 
@@ -150,10 +150,11 @@ function Home() {
               </p>
             </div>
             
-            <HorizontalCarousel 
-              title="Historical Favorites" 
-              books={bestHistory} 
-            />
+           <HorizontalCarousel 
+  title="Most Popular" 
+  books={mainBookList.filter(book => book.downloadCount > 1000).slice(0, 10)} 
+  isLoading={isLoading}
+/>
           </section>
           
           {/* Recently Reviewed */}
@@ -168,11 +169,12 @@ function Home() {
             </div>
             
             <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100">
-              <BookSection 
-                title="Community Favorites" 
-                books={standardBooks.slice(0, 4)} 
-                compact={true}
-              />
+             <BookSection 
+  title="All Books Collection" 
+  books={mainBookList} 
+  isLoading={isLoading}
+  showViewAll={mainBookList.length > 12}
+/>
             </div>
           </section>
 

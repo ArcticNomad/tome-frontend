@@ -1,10 +1,10 @@
+// src/hooks/useBookData.js
 import { useState, useEffect } from 'react';
-import { fetchAllBooks } from '../api/books'; // Assuming an API utility file exists
-import { standardBooks } from '../data'; // Mock data fallback (Assuming data.js is one level up from hooks/)
+import { fetchAllBooks } from '../api/books';
+import { standardBooks } from '../data';
 
 /**
- * Custom hook to fetch all book data from the API and manage loading state.
- * @returns {{books: Array, isLoading: boolean, error: Error|null}}
+ * Custom hook to fetch all book data from the API
  */
 export function useBookData() {
     const [books, setBooks] = useState([]);
@@ -12,23 +12,45 @@ export function useBookData() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        let mounted = true;
+
         const loadBooks = async () => {
             try {
-                const liveData = await fetchAllBooks();
-                setBooks(liveData);
+                setIsLoading(true);
                 setError(null);
+                
+                console.log('[Hook] Starting book data fetch...');
+                const liveData = await fetchAllBooks();
+                
+                if (mounted) {
+                    if (liveData && liveData.length > 0) {
+                        setBooks(liveData);
+                        console.log(`[Hook] Successfully loaded ${liveData.length} books from API`);
+                    } else {
+                        throw new Error('No data received from API');
+                    }
+                }
             } catch (err) {
-                console.error("[Hook Error] Falling back to mock data.", err);
-                setError(err);
-                // Fallback to mock data slice on failure
-                setBooks(standardBooks.slice(0, 20)); 
+                if (mounted) {
+                    console.warn('[Hook] API fetch failed, using mock data:', err.message);
+                    setError(err);
+                    setBooks(standardBooks.slice(0, 20));
+                }
             } finally {
-                setIsLoading(false);
+                if (mounted) {
+                    setIsLoading(false);
+                }
             }
         };
 
         loadBooks();
+
+        return () => {
+            mounted = false;
+        };
     }, []);
 
     return { books, isLoading, error };
 }
+
+export default useBookData;

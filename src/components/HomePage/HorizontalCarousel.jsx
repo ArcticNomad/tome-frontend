@@ -1,38 +1,50 @@
 // src/components/HomePage/HorizontalCarousel.jsx
 import React, { useRef, useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, Download } from 'lucide-react';
 
-const HorizontalCarousel = ({ title, books, categories, activeCategory, onCategoryChange }) => {
+const HorizontalCarousel = ({ 
+  title, 
+  books, 
+  categories, 
+  activeCategory, 
+  onCategoryChange,
+  isLoading = false 
+}) => {
   const scrollContainerRef = useRef(null);
   const animationRef = useRef(null);
-  
-  // 1. New Ref to track the EXACT float position (e.g., 10.5px)
-  // This solves the issue where the browser rounds 0.5 down to 0
   const currentScrollRef = useRef(0);
+  const SCROLL_SPEED = 0.17;
 
-  // Duplicate data for infinite loop illusion
-  const extendedBooks = books && books.length > 0 ? [...books, ...books, ...books, ...books] : [];
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  useEffect(() => {
+    // Don't start scroll if no books or loading
+    if (isLoading || !books || books.length === 0) {
+      return;
+    }
 
-  const SCROLL_SPEED = 0.17; // Slightly increased for visibility
+    currentScrollRef.current = 0;
+    if (scrollContainerRef.current) scrollContainerRef.current.scrollLeft = 0;
+
+    const timeoutId = setTimeout(() => {
+        startScroll();
+    }, 100);
+    
+    return () => {
+        clearTimeout(timeoutId);
+        stopScroll();
+    };
+  }, [books, isLoading]); 
 
   const startScroll = () => {
-    // Clear any existing animation to prevent speeding up
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
     const animate = () => {
       const container = scrollContainerRef.current;
       
       if (container) {
-        // 1. Increment our TRACKER, not the DOM directly
         currentScrollRef.current += SCROLL_SPEED;
-
-        // 2. Apply the tracker value to the DOM
         container.scrollLeft = currentScrollRef.current;
 
-        // 3. Infinite Loop Reset Logic
-        // If we have scrolled past the length of the first set (1/4 of total content now)
-        // We reset the position. 
-        // We use scrollWidth / 4 because we duplicated data 4 times.
         if (container.scrollLeft >= container.scrollWidth / 4) {
           currentScrollRef.current = 0;
           container.scrollLeft = 0;
@@ -49,42 +61,52 @@ const HorizontalCarousel = ({ title, books, categories, activeCategory, onCatego
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
   };
 
-  useEffect(() => {
-    // Safety check: Don't scroll if no books
-    if (!books || books.length === 0) return;
-
-    // Reset position when category changes
-    currentScrollRef.current = 0;
-    if (scrollContainerRef.current) scrollContainerRef.current.scrollLeft = 0;
-
-    const timeoutId = setTimeout(() => {
-        startScroll();
-    }, 100);
-    
-    return () => {
-        clearTimeout(timeoutId);
-        stopScroll();
-    };
-  }, [books]); 
-
   const manualScroll = (direction) => {
     const container = scrollContainerRef.current;
     if (container) {
-      stopScroll(); // Stop auto-scroll momentarily
+      stopScroll();
       
       const scrollAmount = direction === 'left' ? -300 : 300;
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
       
-      // Update our tracker to match where the manual scroll landed
-      // We add a delay to wait for the smooth scroll to finish
       setTimeout(() => {
         currentScrollRef.current = container.scrollLeft;
-        startScroll(); // Restart auto-scroll
+        startScroll();
       }, 500);
     }
   };
 
-  if (!books || books.length === 0) return null;
+  // Now we can conditionally return after all hooks are called
+  if (isLoading) {
+    return (
+      <div className="mb-10">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">{title}</h2>
+        <div className="flex gap-4 overflow-x-auto hide-scrollbar">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex-none w-[140px] animate-pulse">
+              <div className="aspect-[2/3] bg-gray-200 rounded-xl mb-3"></div>
+              <div className="h-4 bg-gray-200 rounded mb-1"></div>
+              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!books || books.length === 0) {
+    return (
+      <div className="mb-10">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">{title}</h2>
+        <div className="text-center py-8 text-gray-500">
+          <p>No books available</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Duplicate data for infinite loop illusion
+  const extendedBooks = [...books, ...books, ...books, ...books];
 
   return (
     <div className="mb-10 relative group/section">
@@ -117,7 +139,7 @@ const HorizontalCarousel = ({ title, books, categories, activeCategory, onCatego
       >
         <button 
           onClick={() => manualScroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 opacity-0 group-hover/section:opacity-100 transition-opacity disabled:opacity-0"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 opacity-0 group-hover/section:opacity-100 transition-opacity"
         >
           <ChevronLeft size={20} />
         </button>
@@ -126,35 +148,48 @@ const HorizontalCarousel = ({ title, books, categories, activeCategory, onCatego
         <div 
           ref={scrollContainerRef}
           className="flex gap-4 overflow-x-auto hide-scrollbar px-1 py-4 -mx-1"
-          style={{ 
-             // IMPORTANT: We explicitly disable smooth scroll here because
-             // it fights with our frame-by-frame JS animation.
-             scrollBehavior: 'auto' 
-          }}
+          style={{ scrollBehavior: 'auto' }}
         >
-          {extendedBooks.map((book, index) => (
-            <div 
-              key={`${book.id}-${index}`} 
-              className="flex-none w-[140px] md:w-[160px] transition-transform hover:-translate-y-1 duration-300"
-            >
-              <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md mb-3 group relative cursor-pointer">
-                <img 
-                  src={book.cover} 
-                  alt={book.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+          {extendedBooks.map((book, index) => {
+            const bookCover = book.coverImageUrl || '/placeholder-book.jpg';
+            const downloadCount = book.downloadCount || 0;
+            const rating = Math.min(5, 3 + (downloadCount / 10000) * 2).toFixed(1);
+
+            return (
+              <div 
+                key={`${book.gutenbergId || book._id}-${index}`} 
+                className="flex-none w-[140px] md:w-[160px] transition-transform hover:-translate-y-1 duration-300 cursor-pointer"
+              >
+                <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md mb-3 group relative">
+                  <img 
+                    src={bookCover} 
+                    alt={book.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.src = '/placeholder-book.jpg';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+                  
+                  {/* Download badge for popular books */}
+                  {downloadCount > 10000 && (
+                    <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded-full flex items-center gap-1">
+                      <Download size={8} />
+                      <span>{(downloadCount / 1000).toFixed(0)}k</span>
+                    </div>
+                  )}
+                </div>
+                
+                <h3 className="font-bold text-gray-800 text-sm truncate">{book.title}</h3>
+                <p className="text-xs text-gray-500 mb-1 truncate">{book.author}</p>
+                
+                <div className="flex items-center gap-1">
+                  <Star size={10} className="fill-yellow-400 text-yellow-400" />
+                  <span className="text-[10px] text-gray-400">{rating}</span>
+                </div>
               </div>
-              
-              <h3 className="font-bold text-gray-800 text-sm truncate">{book.title}</h3>
-              <p className="text-xs text-gray-500 mb-1 truncate">{book.author}</p>
-              
-              <div className="flex items-center gap-1">
-                <Star size={10} className="fill-yellow-400 text-yellow-400" />
-                <span className="text-[10px] text-gray-400">4.8</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <button 

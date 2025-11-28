@@ -1,23 +1,37 @@
-const API_ENDPOINT = '/api/books';
+// src/api/books.js
+// For development, use localhost; for production, use relative path
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? '/api'  // Vercel will rewrite this
+  : 'http://localhost:5000/api';
 
-/**
- * Fetches the list of books from the Railway backend via the Vercel proxy.
- * This function handles the raw fetch logic.
- * @returns {Promise<Array>} Array of book objects.
- */
 export async function fetchAllBooks() {
-    console.log(`[API] Fetching books from proxy endpoint: ${API_ENDPOINT}`);
+    const url = `${API_BASE_URL}/books`;
+    console.log(`[API] Fetching books from: ${url}`);
     
-    // We rely on the Vercel rewrite rule in vercel.json to forward this call to Railway.
-    const response = await fetch(API_ENDPOINT);
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // Add credentials if needed
+            // credentials: 'include'
+        });
 
-    if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}. Failed to reach backend.`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(`[API] Successfully fetched data:`, data);
+        
+        // Handle both direct array response and paginated response
+        const books = data.books || data;
+        console.log(`[API] Extracted ${books.length} books`);
+        return books;
+        
+    } catch (error) {
+        console.error('[API] Fetch failed:', error);
+        throw error;
     }
-
-    const data = await response.json();
-    return data;
 }
-
-// Future endpoints (e.g., semantic search, user history) would go here:
-// export async function searchBooks(query) { ... }
