@@ -1,23 +1,8 @@
 // src/components/HomePage/BookSection.jsx
-import React, { useState } from 'react';
-import { Heart, Star, ShoppingBag, ChevronRight, Download } from 'lucide-react';
+import React from 'react';
+import { ChevronRight } from 'lucide-react';
 import BookCard from './BookCard';
-// --- Sub-Component: Star Rating Helper ---
-const StarRating = ({ rating, reviewCount = 42 }) => {
-  return (
-    <div className="flex items-center gap-0.5 text-yellow-400 mb-1">
-      {[...Array(5)].map((_, i) => (
-        <Star 
-          key={i} 
-          size={12} 
-          fill={i < Math.floor(rating) ? "currentColor" : "none"} 
-          className={i < Math.floor(rating) ? "" : "text-gray-300"}
-        />
-      ))}
-      <span className="text-[10px] text-gray-400 ml-1">({reviewCount})</span>
-    </div>
-  );
-};
+import StarRating from './StarRating';
 
 // --- Sub-Component: Loading Skeleton ---
 const BookSkeleton = () => (
@@ -27,8 +12,6 @@ const BookSkeleton = () => (
     <div className="h-3 bg-gray-200 rounded w-1/2"></div>
   </div>
 );
-
-<BookCard />;
 
 const BookSection = ({ title, books, isLoading = false, showViewAll = true, compact = false }) => {
   const displayBooks = books || [];

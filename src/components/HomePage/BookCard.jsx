@@ -1,13 +1,22 @@
 // src/components/HomePage/BookCard.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, ShoppingBag, Download } from 'lucide-react';
 import StarRating from './StarRating';
 
 const BookCard = ({ book }) => {
   const [isLiked, setIsLiked] = useState(false);
+  const [imageSrc, setImageSrc] = useState(book.coverImageUrl || 'https://tome-frontend-arc.vercel.app/placeholder-book.jpg');
+
+  // Handle case where the book prop might change
+  useEffect(() => {
+    setImageSrc(book.coverImageUrl || 'https://tome-frontend-arc.vercel.app/placeholder-book.jpg');
+  }, [book.coverImageUrl]);
+
+  const handleError = () => {
+    setImageSrc('https://tome-frontend-arc.vercel.app/placeholder-book.jpg');
+  };
 
   // Handle MongoDB data structure
- const bookCover = book.coverImageUrl || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450&fit=crop';
   const bookTitle = book.title || 'Untitled';
   const bookAuthor = book.author || 'Unknown Author';
   const bookId = book.gutenbergId || book._id;
@@ -23,8 +32,9 @@ const BookCard = ({ book }) => {
       <div className=" border-2 border-black relative rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-2 aspect-[2/3] " >
         
         <img 
-          src={bookCover} 
+          src={imageSrc} 
           alt={bookTitle} 
+          onError={handleError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
 

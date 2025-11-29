@@ -1,22 +1,25 @@
-// Mock firebase auth service
+// NOTE: Firebase Client SDK must be installed: npm install firebase
 
-export const auth = {};
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
-export const createUserWithEmailAndPassword = async (auth, email, password) => {
-  console.log('Mock createUserWithEmailAndPassword', { email, password });
-  if (email === 'exists@example.com') {
-    const error = new Error('This email is already registered. Please sign in.');
-    error.code = 'auth/email-already-in-use';
-    throw error;
-  }
-  if (password.length < 6) {
-    const error = new Error('The password is too weak. Choose a stronger one.');
-    error.code = 'auth/weak-password';
-    throw error;
-  }
-  return {
-    user: {
-      uid: 'mock-uid-' + Math.random().toString(36).substring(2, 15),
-    },
-  };
+// --- IMPORTANT ---
+// These keys must be configured on Vercel as environment variables (e.g., VITE_FIREBASE_API_KEY)
+// We use placeholder values here.
+
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Export the authentication functions and object for use in components
+export { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword };
+
+// You will eventually integrate Google/Social Sign-in here as well.

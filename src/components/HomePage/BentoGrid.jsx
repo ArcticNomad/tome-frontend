@@ -1,5 +1,26 @@
 // src/components/HomePage/BentoGrid.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+const BentoImage = ({ src, alt }) => {
+  const [imageSrc, setImageSrc] = useState(src);
+
+  useEffect(() => {
+    setImageSrc(src);
+  }, [src]);
+
+  const handleError = () => {
+    setImageSrc('https://tome-frontend-arc.vercel.app/placeholder-book.jpg');
+  };
+
+  return (
+    <img 
+      src={imageSrc} 
+      alt={alt} 
+      onError={handleError}
+      className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
+    />
+  );
+};
 
 const BentoGrid = ({ featuredBooks = [] }) => {
   // Use provided featured books or show loading state
@@ -31,13 +52,9 @@ const BentoGrid = ({ featuredBooks = [] }) => {
         
         {/* Item 1: Big featured item (2x2) */}
         <div className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden group cursor-pointer">
-            <img 
+            <BentoImage 
               src={displayBooks[0]?.coverImageUrl || '/placeholder-book.jpg'} 
               alt={displayBooks[0]?.title} 
-              className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
-              onError={(e) => {
-                e.target.src = '/placeholder-book.jpg';
-              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             <div className="absolute bottom-0 inset-x-0 p-4 text-white">
@@ -53,13 +70,9 @@ const BentoGrid = ({ featuredBooks = [] }) => {
 
         {/* Item 2: Tall item (1x2) */}
         <div className="col-span-1 row-span-2 relative rounded-2xl overflow-hidden group cursor-pointer">
-             <img 
+             <BentoImage 
                src={displayBooks[1]?.coverImageUrl || '/placeholder-book.jpg'} 
                alt={displayBooks[1]?.title} 
-               className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
-               onError={(e) => {
-                 e.target.src = '/placeholder-book.jpg';
-               }}
              />
              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
              <div className="absolute bottom-0 inset-x-0 p-3 text-white">
@@ -70,23 +83,15 @@ const BentoGrid = ({ featuredBooks = [] }) => {
 
         {/* Items 3 & 4: Standard squares (1x1) */}
         <div className="col-span-1 row-span-1 relative rounded-2xl overflow-hidden group cursor-pointer">
-             <img 
+             <BentoImage 
                src={displayBooks[2]?.coverImageUrl || '/placeholder-book.jpg'} 
                alt={displayBooks[2]?.title} 
-               className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
-               onError={(e) => {
-                 e.target.src = '/placeholder-book.jpg';
-               }}
              />
         </div>
          <div className="col-span-1 row-span-1 relative rounded-2xl overflow-hidden group cursor-pointer">
-             <img 
+             <BentoImage 
                src={displayBooks[3]?.coverImageUrl || '/placeholder-book.jpg'} 
                alt={displayBooks[3]?.title} 
-               className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
-               onError={(e) => {
-                 e.target.src = '/placeholder-book.jpg';
-               }}
              />
         </div>
 

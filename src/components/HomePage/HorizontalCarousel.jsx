@@ -1,6 +1,7 @@
 // src/components/HomePage/HorizontalCarousel.jsx
 import React, { useRef, useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Star, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import BookCard from './BookCard';
 
 const HorizontalCarousel = ({ 
   title, 
@@ -150,46 +151,14 @@ const HorizontalCarousel = ({
           className="flex gap-4 overflow-x-auto hide-scrollbar px-1 py-4 -mx-1"
           style={{ scrollBehavior: 'auto' }}
         >
-          {extendedBooks.map((book, index) => {
-            const bookCover = book.coverImageUrl || '/placeholder-book.jpg';
-            const downloadCount = book.downloadCount || 0;
-            const rating = Math.min(5, 3 + (downloadCount / 10000) * 2).toFixed(1);
-
-            return (
-              <div 
-                key={`${book.gutenbergId || book._id}-${index}`} 
-                className="flex-none w-[140px] md:w-[160px] transition-transform hover:-translate-y-1 duration-300 cursor-pointer"
-              >
-                <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md mb-3 group relative">
-                  <img 
-                    src={bookCover} 
-                    alt={book.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => {
-                      e.target.src = '/placeholder-book.jpg';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
-                  
-                  {/* Download badge for popular books */}
-                  {downloadCount > 10000 && (
-                    <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded-full flex items-center gap-1">
-                      <Download size={8} />
-                      <span>{(downloadCount / 1000).toFixed(0)}k</span>
-                    </div>
-                  )}
-                </div>
-                
-                <h3 className="font-bold text-gray-800 text-sm truncate">{book.title}</h3>
-                <p className="text-xs text-gray-500 mb-1 truncate">{book.author}</p>
-                
-                <div className="flex items-center gap-1">
-                  <Star size={10} className="fill-yellow-400 text-yellow-400" />
-                  <span className="text-[10px] text-gray-400">{rating}</span>
-                </div>
-              </div>
-            );
-          })}
+          {extendedBooks.map((book, index) => (
+            <div 
+              key={`${book.gutenbergId || book._id}-${index}`} 
+              className="flex-none w-[140px] md:w-[160px] transition-transform hover:-translate-y-1 duration-300"
+            >
+              <BookCard book={book} />
+            </div>
+          ))}
         </div>
 
         <button 
