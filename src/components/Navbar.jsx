@@ -47,7 +47,7 @@ const Navbar = () => {
       >
 
         {/* --- LEFT: LOGO --- */}
-        <a href="#" className="text-2xl font-black tracking-tighter flex items-center gap-2 hover:opacity-80 transition">
+        <Link to="/" className="text-2xl font-black tracking-tighter flex items-center gap-2 hover:opacity-80 transition">
           <div className="grid grid-cols-2 gap-0.5 w-6 h-6">
             <div className="bg-stone-900 rounded-full w-full h-full"></div>
             <div className="bg-stone-900 rounded-full w-full h-full"></div>
@@ -55,13 +55,13 @@ const Navbar = () => {
             <div className="bg-stone-900 rounded-full w-full h-full"></div>
           </div>
           <span>TOME</span>
-        </a>
+        </Link>
 
         {/* --- CENTER: LINKS --- */}
         <div className="hidden md:flex space-x-6 text-xs tracking-widest uppercase font-medium text-stone-500 absolute left-1/2 transform -translate-x-1/2">
-          <a href="#" className="hover:text-stone-900 transition">Books</a>
-          <a href="#" className="hover:text-stone-900 transition">Tags</a>
-          <a href="#" className="hover:text-stone-900 transition">Reader</a>
+          <Link to="/home" className="hover:text-stone-900 transition">Books</Link>
+          <Link to="/tags" className="hover:text-stone-900 transition">Tags</Link>
+          <Link to="/reader" className="hover:text-stone-900 transition">Reader</Link>
         </div>
 
         {/* --- RIGHT: SEARCH + LOGIN + PROFILE --- */}
@@ -78,10 +78,10 @@ const Navbar = () => {
           <div className="h-4 w-px bg-stone-300 hidden md:block"></div>
 
           <div className="flex items-center gap-4">
-            <a href="#" className="text-stone-600 hover:text-stone-900 transition whitespace-nowrap">Log In</a>
-            <a href="#" className="bg-stone-900 text-stone-50 px-5 py-2.5 rounded-full hover:bg-stone-700 transition shadow-md whitespace-nowrap">
+            <Link to="/login" className="text-stone-600 hover:text-stone-900 transition whitespace-nowrap">Log In</Link>
+            <Link to="/signup" className="bg-stone-900 text-stone-50 px-5 py-2.5 rounded-full hover:bg-stone-700 transition shadow-md whitespace-nowrap">
               Sign Up
-            </a>
+            </Link>
           </div>
 
           <div className="relative group cursor-pointer ml-2">

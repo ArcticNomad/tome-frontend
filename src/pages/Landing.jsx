@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ShoppingCart, Search, ArrowRight, Instagram, Facebook, Linkedin, Youtube, MoveRight, Star } from 'lucide-react';
 
 // --- Data ---
@@ -71,6 +72,9 @@ const Hero = () => (
       <span className="text-[10rem] md:text-[18rem] font-black text-stone-900 leading-none">E</span>
     </div>
     
+    <div className="text-center mt-8">
+      <Link to="/home" className="text-stone-900 underline text-xs uppercase tracking-widest hover:text-stone-600">Explore our books</Link>
+    </div>
     <div className="w-full max-w-4xl h-px bg-stone-200 mt-12"></div>
   </div>
 );
@@ -108,7 +112,7 @@ const Mission = () => (
           Everything we do is designed to rebuild self worth and independence, in order to break free from the cycle of disadvantage.
           With every purchase you make with us, you're helping to change the course of someone's life.
         </p>
-        <a href="#" className="text-stone-900 underline text-xs uppercase tracking-widest hover:text-stone-600">See Our Products</a>
+        <Link to="/home" className="text-stone-900 underline text-xs uppercase tracking-widest hover:text-stone-600">See Our Books</Link>
       </div>
     </div>
   </div>
@@ -222,7 +226,7 @@ const Authors = () => (
 );
 
 const Footer = () => (
-    <footer className="bg-[#2c2a26] text-white pt-20 pb-8 px-8 md:px-16">
+    <footer className="bg-[#2c2a26] text-white pt-20 pb-8 px-8 md:px-16 border-t border-gray-100 bg-stone-100">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-20">
             <div>
                 <h4 className="font-black uppercase tracking-widest mb-6 text-stone-200">Follow</h4>

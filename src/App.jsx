@@ -4,6 +4,9 @@ import Home from './pages/Home';
 import Library from './pages/Library';
 import Login from './pages/Login';
 import Landing from './pages/Landing';
+import Tags from './pages/Tags';
+import Reader from './pages/Reader';
+import SignUpForm from './pages/SignUp';
 
 function App() {
 
@@ -16,6 +19,9 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/library" element={<Library />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/tags" element={<Tags />} />
+          <Route path="/reader" element={<Reader />} />
+          <Route path="/signup" element={<SignUpForm />} />
         </Routes>
       </div>
     </div>

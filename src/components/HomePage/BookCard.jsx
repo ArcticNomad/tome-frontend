@@ -17,10 +17,10 @@ const BookCard = ({ book }) => {
   const rating = Math.min(5, 3 + (downloadCount / 10000) * 2).toFixed(1);
 
   return (
-    <div className="flex flex-col group relative cursor-pointer">
+    <div className="flex flex-col group relative cursor-pointer  hover:border-stone-600 rounded-2xl p-2 transition-all duration-300 border border-transparent">
       
       {/* Cover Image Container */}
-      <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-2 aspect-[2/3]">
+      <div className=" border-2 border-black relative rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-2 aspect-[2/3] " >
         
         <img 
           src={bookCover} 
