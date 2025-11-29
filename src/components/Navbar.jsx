@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, X } from 'lucide-react';
+import { Search } from 'lucide-react';
+import SearchBar from './SearchBar';
 
 const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -9,33 +10,7 @@ const Navbar = () => {
     <nav className="relative py-5 px-8 md:px-16 text-stone-800 bg-stone-50 border-b border-stone-200 sticky top-0 z-50 overflow-hidden ">
 
       {/* --- FULL WIDTH SEARCH OVERLAY --- */}
-      <div
-        className={`
-          absolute inset-0 bg-stone-50 flex items-center px-6 md:px-16
-          transition-all duration-300 ease-out
-          ${searchOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
-        `}
-      >
-        <div className="flex items-center w-full gap-3">
-          <Search size={20} className="text-stone-500" />
-
-          <input
-            type="text"
-            placeholder="Search books, authors, genres..."
-            className="
-              w-full bg-stone-100 px-4 py-2 rounded-full border border-stone-300
-              text-sm outline-none
-            "
-          />
-
-          <button
-            onClick={() => setSearchOpen(false)}
-            className="text-stone-600 hover:text-stone-900 transition"
-          >
-            <X size={22} />
-          </button>
-        </div>
-      </div>
+      <SearchBar searchOpen={searchOpen} setSearchOpen={setSearchOpen} />
 
       {/* --- NORMAL NAVBAR CONTENT --- */}
       <div
