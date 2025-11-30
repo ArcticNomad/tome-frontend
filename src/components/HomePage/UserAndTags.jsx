@@ -1,29 +1,32 @@
-// src/components/UserAndTags.jsx
 import React, { useState } from 'react';
-import { currentUser, tags} from '../../data';
+import { useAuth } from '../../hooks/useAuth';
+import { tags } from '../../data';
 import { BookOpen, Trophy, SlidersHorizontal, Plus } from 'lucide-react';
 
 const UserAndTags = () => {
+  const { currentUser } = useAuth();
   const [activeTag, setActiveTag] = useState('All');
 
   // Mock calculation for the progress bar
   const readingGoal = 150;
-  const progressPercentage = Math.min((currentUser.booksRead / readingGoal) * 100, 100);
+  const progressPercentage = currentUser ? Math.min((currentUser.booksRead / readingGoal) * 100, 100) : 0;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 mb-10 items-stretch">
         
       {/* --- 1. User Stats "Widget" (Modernized) --- */}
-       <div className="lg:w-1/4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-        <img src={currentUser.avatar} alt="User" className="w-16 h-16 rounded-full" />
-        <div>
-            <h3 className="font-bold text-gray-800">{currentUser.name}</h3>
-            <div className="flex items-center text-sm text-gray-500 mt-1">
-                <BookOpen className="w-4 h-4 mr-1 text-purple-500" />
-                <span>{currentUser.booksRead} Books read</span>
-            </div>
+      {currentUser && (
+        <div className="lg:w-1/4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+          <img src={currentUser.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'} alt="User" className="w-16 h-16 rounded-full" />
+          <div>
+              <h3 className="font-bold text-gray-800">{currentUser.displayName}</h3>
+              <div className="flex items-center text-sm text-gray-500 mt-1">
+                  <BookOpen className="w-4 h-4 mr-1 text-purple-500" />
+                  <span>0 Books read</span>
+              </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* --- 2. Floating Tag Bar (Modernized) --- */}
       <div className="flex-1 flex flex-col justify-center">

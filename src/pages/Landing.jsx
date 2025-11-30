@@ -72,8 +72,10 @@ const Hero = () => (
       <span className="text-[10rem] md:text-[18rem] font-black text-stone-900 leading-none">E</span>
     </div>
     
-    <div className="text-center mt-8">
+    <div className="text-center mt-8 space-x-8">
       <Link to="/home" className="text-stone-900 underline text-xs uppercase tracking-widest hover:text-stone-600">Explore our books</Link>
+      <Link to="/login" className="text-blue-600 underline text-xs uppercase tracking-widest hover:text-blue-800">Log In</Link>
+      <Link to="/signup" className="text-green-600 underline text-xs uppercase tracking-widest hover:text-green-800">Sign Up</Link>
     </div>
     <div className="w-full max-w-4xl h-px bg-stone-200 mt-12"></div>
   </div>

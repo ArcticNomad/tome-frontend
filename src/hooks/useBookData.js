@@ -1,56 +1,55 @@
-// src/hooks/useBookData.js
 import { useState, useEffect } from 'react';
-import { fetchAllBooks } from '../api/books';
-import { standardBooks } from '../data';
+import {
+  fetchAllBooks,
+  fetchFantasyBooks,
+  fetchRecentlyAdded,
+  fetchPopularBooks,
+  fetchBooksByGenre,
+} from '../api/books';
 
-/**
- * Custom hook to fetch all book data from the API
- */
-export function useBookData() {
-    const [books, setBooks] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+export const useBookData = (category) => {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        let mounted = true;
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true);
+        let response;
+        switch (category) {
+          case 'fantasy':
+            response = await fetchFantasyBooks(50);
+            break;
+          case 'recently-added':
+            response = await fetchRecentlyAdded(50);
+            break;
+          case 'popular':
+            response = await fetchPopularBooks(50);
+            break;
+          case 'all':
+            response = await fetchAllBooks({ limit: 50 });
+            break;
+          default:
+            response = await fetchBooksByGenre(category, 50);
+            break;
+        }
+        if (response.success) {
+          setBooks(response.data);
+        } else {
+          setError(response.message);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        const loadBooks = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-                
-                console.log('[Hook] Starting book data fetch...');
-                const liveData = await fetchAllBooks();
-                
-                if (mounted) {
-                    if (liveData && liveData.length > 0) {
-                        setBooks(liveData);
-                        console.log(`[Hook] Successfully loaded ${liveData.length} books from API`);
-                    } else {
-                        throw new Error('No data received from API');
-                    }
-                }
-            } catch (err) {
-                if (mounted) {
-                    console.warn('[Hook] API fetch failed, using mock data:', err.message);
-                    setError(err);
-                    setBooks(standardBooks.slice(0, 20));
-                }
-            } finally {
-                if (mounted) {
-                    setIsLoading(false);
-                }
-            }
-        };
+    if (category) {
+      fetchBooks();
+    }
+  }, [category]);
 
-        loadBooks();
-
-        return () => {
-            mounted = false;
-        };
-    }, []);
-
-    return { books, isLoading, error };
-}
-
-export default useBookData;
+  return { books, loading, error };
+};
