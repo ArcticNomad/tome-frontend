@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+tome-bca58-firebase-adminsdk-fbsvc-f2a5b2a284.json
+*.json
+firebase-adminsdk-*.json
