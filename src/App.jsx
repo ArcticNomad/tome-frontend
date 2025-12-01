@@ -9,11 +9,14 @@ import Reader from './pages/Reader';
 import SignUpForm from './pages/SignUp';
 import ErrorPage from './pages/ErrorPage';
 import BookLists from './pages/BookLists';
+import ProfilePage from './pages/ProfilePage';
+import BookshelfPage from './pages/Bookshelf';
+import { ToastProvider } from './components/Toast';
 
 function App() {
   return (
     
-    <div>
+    <ToastProvider>
       <Navbar />
       <div className=" mx-auto p-4">
         <Routes>
@@ -25,10 +28,14 @@ function App() {
           <Route path="/reader" element={<Reader />} />
           <Route path="/signup" element={<SignUpForm />} />
           <Route path="/booklists" element={<BookLists />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/bookshelf/:shelfType" element={<BookshelfPage />} />
+
           <Route path="*" element={<ErrorPage statusCode="404" message="Page Not Found" />} />
+
         </Routes>
       </div>
-    </div>
+    </ToastProvider>
   );
 }
 

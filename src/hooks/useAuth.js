@@ -25,6 +25,13 @@ export const useAuth = () => {
     return userCredential;
   };
 
+  const getIdToken = () => {
+    if (currentUser) {
+      return currentUser.getIdToken();
+    }
+    return Promise.resolve(null);
+  };
+
   // Login function
   const login = (email, password) => {
     return signInWithEmailAndPassword(auth, email, password);
@@ -50,6 +57,7 @@ export const useAuth = () => {
     signup,
     login,
     logout,
-    loading
+    loading,
+    getIdToken
   };
 };
