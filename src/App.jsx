@@ -18,7 +18,7 @@ function App() {
     
     <ToastProvider>
       <Navbar />
-      <div className=" mx-auto p-4">
+      <div className="">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/books" element={<Books />} />

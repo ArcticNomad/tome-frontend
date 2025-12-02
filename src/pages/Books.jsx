@@ -54,36 +54,35 @@ function Books() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 font-sans">
+      <div className="min-h-screen bg-chill-bg flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 font-sans">
-      <div className="w-full bg-white/80 backdrop-blur-sm shadow-soft rounded-none lg:rounded-3xl overflow-hidden">
+    <div className="min-h-screen bg-chill-bg font-sans text-gray-200 selection:bg-chill-sage selection:text-black">
+      <div className="w-full bg-chill-bg overflow-hidden">
         
         {/* Hero Section */}
-        <div className="relative">
-          <HeroSlideshow />
-          
+        <div className="relative border-b border-white/5">
+          <HeroSlideshow /> 
         </div>
 
         {/* NEW: Simple Tabs */}
         <div className="px-6 md:px-12 lg:px-16 pt-8">
-          <div className="flex border-b border-gray-200">
+          <div className="flex border-b border-white/10">
             <button
               onClick={() => setActiveTab('free')}
               className={`px-6 py-3 font-medium text-sm transition-all relative ${
                 activeTab === 'free'
-                  ? 'text-blue-600 border-b-2 border-blue-500'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-chill-sage border-b-2 border-chill-sage'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               Free Books
               {activeTab === 'free' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-chill-sage" />
               )}
             </button>
             
@@ -91,13 +90,13 @@ function Books() {
               onClick={() => setActiveTab('paid')}
               className={`px-6 py-3 font-medium text-sm transition-all relative ${
                 activeTab === 'paid'
-                  ? 'text-green-600 border-b-2 border-green-500'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-chill-rose border-b-2 border-chill-rose'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               Paid Books
               {activeTab === 'paid' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500" />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-chill-rose" />
               )}
             </button>
           </div>
@@ -106,7 +105,7 @@ function Books() {
         {/* User Section */}
         {currentUser && (
           <div className="px-6 md:px-12 lg:px-16">
-            <div className="bg-white rounded-2xl shadow-soft p-6 mt-6 border border-gray-100">
+            <div className="bg-chill-card rounded-2xl shadow-lg p-6 mt-6 border border-white/5">
               <UserInfo />
             </div>
           </div>
@@ -115,14 +114,14 @@ function Books() {
         {/* NEW: Tab-specific message */}
         {activeTab === 'paid' && (
           <div className="px-6 md:px-12 lg:px-16 mt-6">
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6">
+            <div className="bg-chill-highlight border border-chill-rose/20 rounded-2xl p-6">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <span className="text-green-600 font-bold">$</span>
+                <div className="w-10 h-10 bg-chill-rose/10 rounded-lg flex items-center justify-center">
+                  <span className="text-chill-rose font-bold">$</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-green-800">Paid Books Coming Soon!</h3>
-                  <p className="text-green-700/70 text-sm mt-1">
+                  <h3 className="font-semibold text-chill-rose">Paid Books Coming Soon!</h3>
+                  <p className="text-gray-400 text-sm mt-1">
                     We're working on integrating premium books from major publishers.
                     For now, enjoy our collection of free public domain books.
                   </p>
@@ -135,8 +134,8 @@ function Books() {
         {/* API Status Indicator */}
         {error && (
           <div className="px-6 md:px-12 lg:px-16 mt-4">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800 text-sm">
+            <div className="bg-chill-highlight border border-yellow-900/30 rounded-lg p-4">
+              <p className="text-yellow-500/80 text-sm">
                 <strong>Note:</strong> {backendStatus === 'disconnected' 
                   ? 'Using sample data. Backend server is not available.' 
                   : 'Some data may be from sample collection.'}
@@ -153,7 +152,7 @@ function Books() {
             <section className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  <h2 className="text-3xl font-bold text-white">
                     {backendStatus === 'connected' ? 'Live Book Collection' : 'Book Collection'}
                   </h2>
                 </div>
@@ -171,7 +170,6 @@ function Books() {
             
             {/* Bento Grid */}
             <section className="relative">
-              <div className="absolute inset-0 rounded-3xl -m-4" />
               <div className="relative z-10">
                 <BentoGrid featuredBooks={featuredBooks} isLoading={isLoading} />
               </div>
@@ -180,8 +178,8 @@ function Books() {
             {/* Recently Added Section */}
             <section className="space-y-6">
               <div className="flex items-center gap-4">
-                <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-emerald-600 rounded-full"></div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <div className="w-2 h-8 bg-chill-sage rounded-full"></div>
+                <h2 className="text-3xl font-bold text-white">
                   Recently Added
                 </h2>
               </div>
@@ -196,8 +194,8 @@ function Books() {
             {/* All Books Collection */}
             <section className="space-y-6">
               <div className="flex items-center gap-4">
-                <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <div className="w-2 h-8 bg-chill-blue rounded-full"></div>
+                <h2 className="text-3xl font-bold text-white">
                   Browse All Books
                 </h2>
               </div>
@@ -213,10 +211,10 @@ function Books() {
             {/* Best of Genre Section */}
             <section className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <h2 className="text-3xl font-bold text-white">
                   Best of Genre
                 </h2>
-                <p className="text-gray-600">Discover top-rated books across different categories</p>
+                <p className="text-gray-400">Discover top-rated books across different categories</p>
               </div>
               
               {/* Genre Tabs */}
@@ -227,8 +225,8 @@ function Books() {
                     onClick={() => setActiveGenre(genre)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       activeGenre === genre 
-                        ? 'bg-purple-600 text-white shadow-md' 
-                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                        ? 'bg-chill-sage text-black shadow-lg shadow-chill-sage/20' 
+                        : 'bg-chill-card border border-white/10 text-gray-400 hover:text-white hover:border-white/20'
                     }`}
                   >
                     {genre}
@@ -240,7 +238,7 @@ function Books() {
               <div className="flex justify-center">
                 <Link
                   to={`/booklists?category=${encodeURIComponent(activeGenre)}`}
-                  className="text-sm text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1 transition-colors"
+                  className="text-sm text-chill-sage hover:text-chill-sand font-medium flex items-center gap-1 transition-colors"
                 >
                   View all {activeGenre} books <ChevronRight size={16} />
                 </Link>
@@ -254,24 +252,24 @@ function Books() {
 
             {/* Fantasy Section */}
             <section className="space-y-6">
-              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100">
+              <div className="bg-chill-card rounded-2xl p-6 border border-white/5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">F</span>
+                    <div className="w-6 h-6 bg-chill-lavender rounded-lg flex items-center justify-center">
+                      <span className="text-black/70 text-sm font-bold">F</span>
                     </div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-900 to-indigo-700 bg-clip-text text-transparent">
+                    <h2 className="text-3xl font-bold text-white">
                       Fantasy & Magic
                     </h2>
                   </div>
                   <Link 
                     to="/booklists?category=Fantasy" 
-                    className="text-sm font-medium text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
+                    className="text-sm font-medium text-chill-lavender hover:text-white flex items-center gap-1 transition-colors"
                   >
                     View all <ChevronRight size={16} />
                   </Link>
                 </div>
-                <p className="text-purple-800/70 text-sm max-w-2xl">
+                <p className="text-gray-400 text-sm max-w-2xl">
                   Escape to magical worlds with our curated selection of fantasy adventures and mythical tales
                 </p>
               </div>
@@ -285,24 +283,24 @@ function Books() {
 
             {/* History & Culture */}
             <section className="space-y-6">
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+              <div className="bg-chill-card rounded-2xl p-6 border border-white/5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">H</span>
+                    <div className="w-6 h-6 bg-chill-sand rounded-lg flex items-center justify-center">
+                      <span className="text-black/70 text-sm font-bold">H</span>
                     </div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-900 to-orange-700 bg-clip-text text-transparent">
+                    <h2 className="text-3xl font-bold text-white">
                       History & Culture
                     </h2>
                   </div>
                   <Link 
                     to="/booklists?category=History" 
-                    className="text-sm font-medium text-amber-600 hover:text-amber-800 flex items-center gap-1 transition-colors"
+                    className="text-sm font-medium text-chill-sand hover:text-white flex items-center gap-1 transition-colors"
                   >
                     View all <ChevronRight size={16} />
                   </Link>
                 </div>
-                <p className="text-amber-800/70 text-sm max-w-2xl">
+                <p className="text-gray-400 text-sm max-w-2xl">
                   Journey through time with our curated selection of historical masterpieces
                 </p>
               </div>
@@ -319,26 +317,26 @@ function Books() {
               <section className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-2 h-8 bg-gradient-to-b from-pink-500 to-rose-600 rounded-full"></div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    <div className="w-2 h-8 bg-chill-rose rounded-full"></div>
+                    <h2 className="text-3xl font-bold text-white">
                       Your Reviews
                     </h2>
                   </div>
-                  <button className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                  <button className="text-sm text-chill-rose hover:text-white font-medium transition-colors">
                     Write a review →
                   </button>
                 </div>
                 
-                <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-8 border border-pink-100 text-center">
+                <div className="bg-chill-highlight rounded-2xl p-8 border border-chill-rose/20 text-center">
                   <div className="flex flex-col items-center justify-center space-y-4">
-                    <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center">
-                      <Star className="w-8 h-8 text-pink-400" />
+                    <div className="w-16 h-16 bg-chill-rose/10 rounded-full flex items-center justify-center">
+                      <Star className="w-8 h-8 text-chill-rose" />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-800">No Reviews Yet</h3>
-                    <p className="text-gray-600 max-w-md">
+                    <h3 className="text-xl font-semibold text-white">No Reviews Yet</h3>
+                    <p className="text-gray-400 max-w-md">
                       You haven't reviewed any books yet. Start exploring our collection and share your thoughts with the community!
                     </p>
-                    <button className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-full font-medium transition-colors flex items-center gap-2">
+                    <button className="bg-chill-rose hover:bg-opacity-90 text-black px-6 py-3 rounded-full font-medium transition-colors flex items-center gap-2">
                       <BookOpen size={18} />
                       Start Reading
                     </button>
@@ -351,17 +349,17 @@ function Books() {
             <section className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></div>
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  <div className="w-2 h-8 bg-chill-lavender rounded-full"></div>
+                  <h2 className="text-3xl font-bold text-white">
                     Community Reviews
                   </h2>
                 </div>
-                <button className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                <button className="text-sm text-chill-lavender hover:text-white font-medium transition-colors">
                   View all reviews →
                 </button>
               </div>
               
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+              <div className="bg-chill-card rounded-2xl p-6 border border-white/5">
                 <BookSection 
                   title="Recently Reviewed" 
                   books={highlyReviewed} 

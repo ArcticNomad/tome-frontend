@@ -45,6 +45,7 @@ const Navbar = () => {
     if (pathname === '/login') return 'Login';
     if (pathname === '/signup') return 'Sign Up';
     
+    
     return pathname.split('/').pop().replace(/-/g, ' ');
   };
 
@@ -109,7 +110,7 @@ const Navbar = () => {
   return (
     <>
       {/* --- NAVBAR --- */}
-      <nav className="relative py-5 px-8 md:px-16 text-stone-800 bg-stone-50 border-b border-stone-200 sticky top-0 z-50 overflow-visible">
+      <nav className="relative py-5 px-8 md:px-16 text-stone-800 bg-chill-surface  sticky top-0 z-50 overflow-visible">
         <SearchBar searchOpen={searchOpen} setSearchOpen={setSearchOpen} />
 
         <div className={`flex justify-between items-center w-full transition-all duration-300 ease-out ${searchOpen ? 'opacity-0 blur-sm scale-95' : 'opacity-100'}`}>
@@ -121,14 +122,16 @@ const Navbar = () => {
               <div className="bg-stone-900 rounded-full w-full h-full"></div>
               <div className="bg-stone-900 rounded-full w-full h-full"></div>
             </div>
-            <span>TOME</span>
+            <span className='text-white'>TOME</span>
           </button>
 
           {/* LINKS */}
-          <div className="hidden md:flex space-x-6 text-xs tracking-widest uppercase font-medium text-stone-500 absolute left-1/2 transform -translate-x-1/2">
-            <button onClick={() => navigate('/books')} className="hover:text-stone-900 transition">Books</button>
-            <button onClick={() => navigate('/tags')} className="hover:text-stone-900 transition">Tags</button>
-            <button onClick={() => navigate('/reader')} className="hover:text-stone-900 transition">Reader</button>
+          <div className="hidden md:flex space-x-6 text-s font-semibold tracking-tighter  uppercase font-medium text-stone-500 absolute left-1/2 transform -translate-x-1/2">
+          <button onClick={() => navigate('/')} className="hover:text-chill-sage transition cursor-pointer">Home</button>
+            <button onClick={() => navigate('/books')} className="hover:text-chill-sage transition cursor-pointer">Books</button>
+            <button onClick={() => navigate('/tags')} className="hover:text-chill-sage transition cursor-pointer">Tags</button>
+            <button onClick={() => navigate('/reader')} className="hover:text-chill-sage transition cursor-pointer">Reader</button>
+            <button onClick={() => navigate('/')} className="hover:text-chill-sage transition cursor-pointer">About Us</button>
           </div>
 
           {/* SEARCH + LOGIN/PROFILE */}
@@ -138,10 +141,10 @@ const Navbar = () => {
               className="flex items-center gap-1 hover:text-stone-500 cursor-pointer"
             >
               <Search size={18} />
-              <span className="hidden lg:inline">Search</span>
+              <span className="hidden lg:inline text-white">Search</span>
             </button>
 
-            <div className="h-4 w-px bg-stone-300 hidden md:block"></div>
+            <div className="h-4 w-px bg-stone-300 hidden md:block "></div>
 
             {currentUser ? (
               <div className="relative ml-2" ref={menuRef}>
@@ -211,7 +214,7 @@ const Navbar = () => {
 
       {/* --- STACK-BASED BREADCRUMB --- */}
       {breadcrumbStack.length > 1 && (
-        <div className="bg-stone-50 py-2 text-sm text-stone-500 border-b border-stone-200">
+        <div className="bg-chill-surface py-2 text-xs text-stone-500 border-b border-stone-200 ">
           <nav className="flex justify-center">
             <div className="inline-flex items-center gap-1 max-w-4xl overflow-x-auto px-4">
               {breadcrumbStack.map((crumb, idx) => {
@@ -222,23 +225,23 @@ const Navbar = () => {
                     {idx === 0 ? (
                       <button
                         onClick={handleHomeClick}
-                        className="flex items-center gap-1 hover:text-stone-800 transition p-1 rounded"
+                        className="flex items-center gap-1 hover:text-stone-800 transition p-1.5 rounded-full hover:bg-stone-200"
                         title="Go Home"
                       >
-                        <Home size={14} />
+                        <Home size={12} />
                       </button>
                     ) : (
-                      <ChevronRight size={14} className="flex-shrink-0" />
+                      <ChevronRight size={12} className="flex-shrink-0 text-stone-400" />
                     )}
                     
                     {isLast ? (
-                      <span className="text-stone-800 capitalize font-medium px-2 py-1 bg-stone-100 rounded">
+                      <span className="text-stone-800 capitalize font-medium px-3 py-0.5 bg-stone-200 rounded-full border border-stone-200 shadow-sm">
                         {crumb.name}
                       </span>
                     ) : (
                       <button
                         onClick={() => handleBreadcrumbClick(crumb, idx)}
-                        className="hover:text-stone-800 transition capitalize px-2 py-1 rounded hover:bg-stone-100 whitespace-nowrap"
+                        className="hover:text-stone-800 transition capitalize px-3 py-0.5 rounded-full hover:bg-stone-200 border border-transparent hover:border-stone-200 whitespace-nowrap"
                       >
                         {crumb.name}
                       </button>

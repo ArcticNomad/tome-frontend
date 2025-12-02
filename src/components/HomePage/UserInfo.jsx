@@ -87,7 +87,7 @@ const UserInfo = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 rounded-3xl border border-stone-100 shadow-sm">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-chill-sage p-6 rounded-3xl  shadow-sm">
       {/* User Greeting */}
       <div className="flex items-center gap-4">
         <img
@@ -99,7 +99,7 @@ const UserInfo = () => {
           <h3 className="text-xl font-bold text-stone-800">
             Welcome back, {currentUser.displayName?.split(' ')[0] || 'Reader'}!
           </h3>
-          <p className="text-stone-500 text-sm">Ready to dive into a new adventure?</p>
+          <p className="text-chill-bg text-sm">Ready to dive into a new adventure?</p>
         </div>
       </div>
 
@@ -110,7 +110,7 @@ const UserInfo = () => {
             <BookOpen className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Continue Reading</p>
+            <p className="text-xs font-medium text-chill-bg uppercase tracking-wider">Continue Reading</p>
             {lastBook ? (
               <Link to={`/read/${lastBook.bookId.gutenbergId || lastBook.bookId._id}`} className="group block">
                 <p className="font-bold text-stone-800 truncate max-w-[180px] group-hover:text-blue-600 transition">
@@ -135,7 +135,7 @@ const UserInfo = () => {
             <Zap className="w-6 h-6" fill="currentColor" />
           </div>
           <div>
-            <p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Reading Streak</p>
+            <p className="text-xs font-medium text-chill-bg uppercase tracking-wider">Reading Streak</p>
             <p className="font-bold text-stone-800 text-lg">
               {streak} <span className="text-sm font-normal text-stone-500">days</span>
             </p>

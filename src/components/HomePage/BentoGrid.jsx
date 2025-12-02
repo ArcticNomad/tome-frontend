@@ -1,4 +1,3 @@
-// src/components/HomePage/BentoGrid.jsx
 import React, { useState, useEffect } from 'react';
 
 const BentoImage = ({ src, alt }) => {
@@ -29,7 +28,7 @@ const BentoGrid = ({ featuredBooks = [] }) => {
   if (displayBooks.length === 0) {
     return (
       <section className="mb-10">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Featured & Trending</h2>
+        <h2 className="text-xl font-bold text-white mb-4">Featured & Trending</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] gap-4">
           {[...Array(5)].map((_, i) => (
             <div 
@@ -37,7 +36,7 @@ const BentoGrid = ({ featuredBooks = [] }) => {
               className={`${
                 i === 0 ? 'col-span-2 row-span-2' : 
                 i === 1 ? 'col-span-1 row-span-2' : 'col-span-1 row-span-1'
-              } bg-gray-200 rounded-2xl animate-pulse`}
+              } bg-chill-highlight rounded-2xl animate-pulse border border-white/5`}
             ></div>
           ))}
         </div>
@@ -47,18 +46,18 @@ const BentoGrid = ({ featuredBooks = [] }) => {
 
   return (
     <section className="mb-10">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">Featured & Trending</h2>
+      <h2 className="text-xl font-bold text-white mb-4">Featured & Trending</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] gap-4">
         
         {/* Item 1: Big featured item (2x2) */}
-        <div className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden group cursor-pointer">
+        <div className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden group cursor-pointer border border-white/5 hover:border-chill-sage/30 transition-colors">
             <BentoImage 
               src={displayBooks[0]?.coverImageUrl || '/placeholder-book.jpg'} 
               alt={displayBooks[0]?.title} 
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-chill-bg/90 via-transparent to-transparent" />
             <div className="absolute bottom-0 inset-x-0 p-4 text-white">
-                <h3 className="text-2xl font-bold drop-shadow-lg">{displayBooks[0]?.title}</h3>
+                <h3 className="text-2xl font-bold drop-shadow-lg text-chill-sage">{displayBooks[0]?.title}</h3>
                 <p className="text-white/90 drop-shadow-lg">{displayBooks[0]?.author}</p>
                 {displayBooks[0]?.downloadCount > 0 && (
                   <p className="text-white/80 text-sm mt-1">
@@ -69,30 +68,36 @@ const BentoGrid = ({ featuredBooks = [] }) => {
         </div>
 
         {/* Item 2: Tall item (1x2) */}
-        <div className="col-span-1 row-span-2 relative rounded-2xl overflow-hidden group cursor-pointer">
+        <div className="col-span-1 row-span-2 relative rounded-2xl overflow-hidden group cursor-pointer border border-white/5 hover:border-chill-sage/30 transition-colors">
              <BentoImage 
                src={displayBooks[1]?.coverImageUrl || '/placeholder-book.jpg'} 
                alt={displayBooks[1]?.title} 
              />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+             <div className="absolute inset-0 bg-gradient-to-t from-chill-bg/80 via-transparent to-transparent" />
              <div className="absolute bottom-0 inset-x-0 p-3 text-white">
-                <h3 className="font-bold leading-tight text-sm drop-shadow-lg">{displayBooks[1]?.title}</h3>
+                <h3 className="font-bold leading-tight text-sm drop-shadow-lg text-chill-rose">{displayBooks[1]?.title}</h3>
                 <p className="text-white/80 text-xs drop-shadow-lg">{displayBooks[1]?.author}</p>
              </div>
         </div>
 
         {/* Items 3 & 4: Standard squares (1x1) */}
-        <div className="col-span-1 row-span-1 relative rounded-2xl overflow-hidden group cursor-pointer">
+        <div className="col-span-1 row-span-1 relative rounded-2xl overflow-hidden group cursor-pointer border border-white/5 hover:border-chill-sage/30 transition-colors">
              <BentoImage 
                src={displayBooks[2]?.coverImageUrl || '/placeholder-book.jpg'} 
                alt={displayBooks[2]?.title} 
              />
+             <div className="absolute inset-0 bg-gradient-to-t from-chill-bg/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2">
+                <p className="text-xs font-bold text-white truncate w-full">{displayBooks[2]?.title}</p>
+             </div>
         </div>
-         <div className="col-span-1 row-span-1 relative rounded-2xl overflow-hidden group cursor-pointer">
+         <div className="col-span-1 row-span-1 relative rounded-2xl overflow-hidden group cursor-pointer border border-white/5 hover:border-chill-sage/30 transition-colors">
              <BentoImage 
                src={displayBooks[3]?.coverImageUrl || '/placeholder-book.jpg'} 
                alt={displayBooks[3]?.title} 
              />
+             <div className="absolute inset-0 bg-gradient-to-t from-chill-bg/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2">
+                <p className="text-xs font-bold text-white truncate w-full">{displayBooks[3]?.title}</p>
+             </div>
         </div>
 
       </div>
