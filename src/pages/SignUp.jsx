@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Loader, 
   BookOpen, 
@@ -9,19 +9,140 @@ import {
   ChevronRight,
   ChevronLeft,
   Upload,
-  X
+  X,
+  CheckCircle,
+  AlertCircle,
+  Search,
+  Plus
 } from "lucide-react";
-import { useAuth } from "../hooks/useAuth"; 
-import AuthSuccess from "../components/auth/AuthSuccess";
-import AuthFailure from "../components/auth/AuthFailure";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
-// Genre options matching profile page
+// ==========================================
+// MODAL COMPONENTS
+// ==========================================
+
+const AuthSuccess = ({ message, onClose }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-chill-bg/80 backdrop-blur-sm p-4 animate-fadeIn">
+    <div className="bg-chill-card border border-chill-sage/20 rounded-2xl p-8 max-w-sm w-full text-center shadow-glow-sage">
+      <div className="w-16 h-16 bg-chill-sage/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <CheckCircle className="w-8 h-8 text-chill-sage" />
+      </div>
+      <h3 className="text-xl font-bold text-white mb-2">Success!</h3>
+      <p className="text-gray-400 mb-6">{message}</p>
+      <button onClick={onClose} className="w-full py-3 px-4 bg-chill-sage text-black font-bold rounded-xl hover:bg-chill-sand transition">
+        Continue
+      </button>
+    </div>
+  </div>
+);
+
+const AuthFailure = ({ message, onClose }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-chill-bg/80 backdrop-blur-sm p-4 animate-fadeIn">
+    <div className="bg-chill-card border border-chill-rose/20 rounded-2xl p-8 max-w-sm w-full text-center shadow-lg">
+      <div className="w-16 h-16 bg-chill-rose/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <AlertCircle className="w-8 h-8 text-chill-rose" />
+      </div>
+      <h3 className="text-xl font-bold text-white mb-2">Something went wrong</h3>
+      <p className="text-gray-400 mb-6">{message}</p>
+      <button onClick={onClose} className="w-full py-3 px-4 bg-chill-rose text-black font-bold rounded-xl hover:bg-opacity-90 transition">
+        Try Again
+      </button>
+    </div>
+  </div>
+);
+
+// --- Autocomplete Component ---
+const Autocomplete = ({ options = [], value, onChange, placeholder, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(value || "");
+  const wrapperRef = useRef(null);
+
+  useEffect(() => { setSearchTerm(value || ""); }, [value]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const safeOptions = Array.isArray(options) ? options : [];
+  const filteredOptions = safeOptions.filter(option =>
+    typeof option === 'string' && option.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <div className="relative">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setIsOpen(true);
+            onChange(e.target.value); 
+          }}
+          onFocus={() => setIsOpen(true)}
+          disabled={disabled}
+          placeholder={placeholder}
+          className={`w-full px-4 py-2.5 bg-chill-surface border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-chill-sage focus:ring-1 focus:ring-chill-sage transition ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        />
+        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+          <Search size={16} className="text-gray-500" />
+        </div>
+      </div>
+      {isOpen && !disabled && filteredOptions.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-chill-surface border border-white/10 rounded-xl shadow-xl max-h-48 overflow-y-auto hide-scrollbar">
+          {filteredOptions.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => { onChange(option); setSearchTerm(option); setIsOpen(false); }}
+              className="w-full text-left px-4 py-2 text-gray-300 hover:bg-white/5 hover:text-chill-sage transition-colors text-sm"
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==========================================
+// DATA CONSTANTS
+// ==========================================
+
 const GENRES = [
   'Romance', 'Mystery/Thriller', 'Fantasy', 'Science Fiction', 
   'Historical Fiction', 'Biography', 'Self-Help', 'Young Adult',
   'Horror', 'Literary Fiction', 'Poetry', 'Drama'
 ];
+
+const LOCATIONS = {
+  "United States": ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego"],
+  "United Kingdom": ["London", "Manchester", "Birmingham", "Leeds", "Glasgow", "Southampton", "Liverpool", "Newcastle"],
+  "Canada": ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa", "Edmonton", "Mississauga", "Winnipeg"],
+  "Australia": ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide", "Gold Coast", "Canberra"],
+  "Germany": ["Berlin", "Hamburg", "Munich", "Cologne", "Frankfurt", "Stuttgart", "Düsseldorf"],
+  "France": ["Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Strasbourg"],
+  "Japan": ["Tokyo", "Yokohama", "Osaka", "Nagoya", "Sapporo", "Fukuoka", "Kobe"],
+  "Italy": ["Rome", "Milan", "Naples", "Turin", "Palermo", "Genoa", "Bologna", "Florence"],
+  "Spain": ["Madrid", "Barcelona", "Valencia", "Seville", "Zaragoza", "Málaga", "Murcia", "Palma"],
+  "India": ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", "Kolkata", "Surat"],
+  "China": ["Shanghai", "Beijing", "Guangzhou", "Shenzhen", "Chengdu", "Tianjin", "Wuhan", "Dongguan"],
+  "Brazil": ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador", "Fortaleza", "Belo Horizonte", "Manaus", "Curitiba"],
+  "Pakistan": ["Karachi", "Lahore", "Faisalabad", "Rawalpindi", "Multan", "Hyderabad", "Gujranwala", "Peshawar"],
+  "Other": [] 
+};
+
+// ==========================================
+// MAIN COMPONENT
+// ==========================================
 
 export default function SignUp() {
     const navigate = useNavigate();
@@ -34,197 +155,226 @@ export default function SignUp() {
     const [showSuccess, setShowSuccess] = useState(false);
     const [showFailure, setShowFailure] = useState(false);
 
-    // Form Data - All info needed for profile
     const [formData, setFormData] = useState({
-        // Step 1: Account Info
-        email: '',
-        password: '',
-        confirmPassword: '',
-        displayName: '',
-        
-        // Step 2: Personal Details
-        gender: '',
-        birthDate: '',
-        city: '',
-        country: '',
-        profilePicture: null,
-        
-        // Step 3: Reading Preferences
-        favoriteGenres: [],
-        readingGoal: 'casual', // casual, regular, avid
-        readingFrequency: 'daily', // daily, weekly, monthly
-        
-        // Step 4: Initial Setup
-        favoriteBook: '',
-        bookshelves: {
-            currentlyReading: [],
-            wantToRead: [],
-            read: []
-        }
+        email: '', password: '', confirmPassword: '', displayName: '',
+        gender: '', birthDate: '', city: '', country: '', profilePicture: null,
+        favoriteGenres: [], readingGoal: 'casual', readingFrequency: 'daily',
+        favoriteBook: '', bookshelves: { currentlyReading: [], wantToRead: [], read: [] }
     });
 
-    // Handle Step 1: Basic Info
+    // Check availability with backend
+    const checkAvailability = async (email, displayName) => {
+      try {
+        // Check email availability
+        const emailResponse = await fetch(`/api/users/profile/check-availability?field=email&value=${encodeURIComponent(email)}`);
+        
+        if (!emailResponse.ok) {
+          throw new Error('Failed to check email availability');
+          
+        }
+        
+        const emailData = await emailResponse.json();
+        
+        // Check display name availability
+        const nameResponse = await fetch(`/api/users/profile/check-availability?field=displayName&value=${encodeURIComponent(displayName)}`);
+        
+        if (!nameResponse.ok) {
+          throw new Error('Failed to check username availability');
+        }
+        
+        const nameData = await nameResponse.json();
+        
+        // If either is not available, throw error
+        if (!emailData.available) {
+          throw new Error('Email already in use');
+        }
+        
+        if (!nameData.available) {
+          throw new Error('Display name already taken');
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('Availability check failed:', error);
+        throw error;
+      }
+    };
+
     const handleStep1 = async (e) => {
         e.preventDefault();
         setError(null);
+        setIsLoading(true);
+
+        // 1. Basic Validation
+        if (!formData.displayName.trim() || !formData.email.trim() || !formData.password || !formData.confirmPassword) {
+            setError("All fields are required.");
+            setShowFailure(true);
+            setIsLoading(false);
+            return;
+        }
 
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match.");
+            setShowFailure(true);
+            setIsLoading(false);
             return;
         }
 
         if (formData.password.length < 6) {
             setError("Password must be at least 6 characters long.");
+            setShowFailure(true);
+            setIsLoading(false);
             return;
         }
 
-        setCurrentStep(2);
+        // 2. Check Availability
+        try {
+            await checkAvailability(formData.email, formData.displayName);
+            // If successful, proceed
+            setCurrentStep(2);
+        } catch (err) {
+            setError(err.message);
+            setShowFailure(true);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    // Handle Step 2: Personal Details
-    const handleStep2 = (e) => {
-        e.preventDefault();
-        setCurrentStep(3);
+    const handleStep2 = (e) => { 
+        e.preventDefault(); 
+        
+        // Validate Step 2 Fields
+        if (!formData.gender || !formData.birthDate || !formData.country || !formData.city) {
+            setError("Please fill in all required fields.");
+            setShowFailure(true);
+            return;
+        }
+        
+        setCurrentStep(3); 
     };
 
-    // Handle Step 3: Preferences
-    const handleStep3 = (e) => {
-        e.preventDefault();
-        setCurrentStep(4);
+    const handleStep3 = (e) => { 
+        e.preventDefault(); 
+        
+        // Validate Step 3 (At least 3 genres)
+        if (formData.favoriteGenres.length < 3) {
+            setError("Please select at least 3 favorite genres.");
+            setShowFailure(true);
+            return;
+        }
+
+        setCurrentStep(4); 
     };
 
-    // Handle Final Step: Complete Signup
-  // src/pages/SignUp.jsx (modify the handleFinalSubmit function)
-const handleFinalSubmit = async (e) => {
+  const handleFinalSubmit = async (e) => {
   e.preventDefault();
   setIsLoading(true);
   setError(null);
-
+  
   try {
-    // 1. Create user in Firebase
-    const userCredential = await signup(
-      formData.email, 
-      formData.password, 
-      formData.displayName
-    );
+    // 1. Create Firebase account
+    const userCredential = await signup(formData.email, formData.password, formData.displayName);
+    const token = await userCredential.user.getIdToken();
     
-    // 2. Get Firebase ID token
-    const idToken = await userCredential.user.getIdToken();
+    console.log('Firebase account created, token:', token.substring(0, 20) + '...');
     
-    // 3. Create user profile in your backend
+    // 2. Create user profile in backend
+    const profileData = {
+      displayName: formData.displayName,
+      email: formData.email,
+      gender: formData.gender,
+      birthDate: formData.birthDate,
+      location: formData.city ? `${formData.city}, ${formData.country}` : formData.country,
+      favoriteGenres: formData.favoriteGenres,
+      readingGoal: formData.readingGoal,
+      favoriteBook: formData.favoriteBook
+    };
+    
+    console.log('Sending profile data:', profileData);
+    
     const profileResponse = await fetch('/api/users/profile/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`
+        'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({
-        displayName: formData.displayName,
-        personalDetails: {
-          gender: formData.gender,
-          birthDate: formData.birthDate,
-          location: {
-            city: formData.city,
-            country: formData.country
-          }
-        },
-        readingPreferences: {
-          favoriteGenres: formData.favoriteGenres,
-          readingGoal: formData.readingGoal,
-          readingFrequency: formData.readingFrequency,
-          favoriteBook: formData.favoriteBook
-        }
-      })
+      body: JSON.stringify(profileData)
     });
-
-    if (!profileResponse.ok) {
-      throw new Error('Failed to create user profile');
+    
+    // First, check if response is JSON
+    const contentType = profileResponse.headers.get('content-type');
+    let responseData;
+    
+    if (contentType && contentType.includes('application/json')) {
+      responseData = await profileResponse.json();
+    } else {
+      // If not JSON, get as text to see what's returned
+      const textResponse = await profileResponse.text();
+      console.error('Non-JSON response from server:', textResponse.substring(0, 200));
+      throw new Error(`Server returned ${profileResponse.status}: ${profileResponse.statusText}. Expected JSON but got: ${contentType}`);
     }
-
+    
+    if (!profileResponse.ok) {
+      throw new Error(responseData.message || `Failed to create user profile: ${profileResponse.status}`);
+    }
+    
+    console.log('Profile created successfully:', responseData);
     setShowSuccess(true);
-
+    
   } catch (err) {
     console.error('Signup error:', err);
-    setError(err.message || "Signup failed. Please try again.");
+    
+    // Firebase error handling
+    let errorMessage = err.message || "Signup failed. Please try again.";
+    
+    if (err.code === 'auth/email-already-in-use') {
+      errorMessage = 'Email already in use. Please try another email.';
+    } else if (err.code === 'auth/weak-password') {
+      errorMessage = 'Password is too weak. Please use a stronger password.';
+    } else if (err.code === 'auth/invalid-email') {
+      errorMessage = 'Invalid email address.';
+    } else if (err.code === 'auth/operation-not-allowed') {
+      errorMessage = 'Email/password accounts are not enabled.';
+    }
+    
+    setError(errorMessage);
     setShowFailure(true);
   } finally {
     setIsLoading(false);
   }
 };
-    // Update form data
     const updateFormData = (field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        setFormData(prev => {
+            if (field === 'country' && prev.country !== value) {
+                return { ...prev, [field]: value, city: '' };
+            }
+            return { ...prev, [field]: value };
+        });
     };
 
-    // Handle genre selection
     const toggleGenre = (genre) => {
         setFormData(prev => {
             const updatedGenres = prev.favoriteGenres.includes(genre)
                 ? prev.favoriteGenres.filter(g => g !== genre)
                 : [...prev.favoriteGenres, genre];
-            
             return { ...prev, favoriteGenres: updatedGenres };
         });
     };
 
-    // Handle profile picture
     const handleProfilePicture = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            updateFormData('profilePicture', file);
-        }
+        if (file) updateFormData('profilePicture', file);
     };
 
-    // Progress calculation
     const progress = (currentStep / 4) * 100;
 
-    // Render current step
     const renderStep = () => {
         switch(currentStep) {
-            case 1:
-                return (
-                    <Step1 
-                        formData={formData}
-                        updateFormData={updateFormData}
-                        onSubmit={handleStep1}
-                        isLoading={isLoading}
-                    />
-                );
-            case 2:
-                return (
-                    <Step2 
-                        formData={formData}
-                        updateFormData={updateFormData}
-                        onSubmit={handleStep2}
-                        onBack={() => setCurrentStep(1)}
-                        handleProfilePicture={handleProfilePicture}
-                    />
-                );
-            case 3:
-                return (
-                    <Step3 
-                        formData={formData}
-                        toggleGenre={toggleGenre}
-                        updateFormData={updateFormData}
-                        onSubmit={handleStep3}
-                        onBack={() => setCurrentStep(2)}
-                    />
-                );
-            case 4:
-                return (
-                    <Step4 
-                        formData={formData}
-                        updateFormData={updateFormData}
-                        onSubmit={handleFinalSubmit}
-                        onBack={() => setCurrentStep(3)}
-                        isLoading={isLoading}
-                    />
-                );
-            default:
-                return null;
+            case 1: return <Step1 formData={formData} updateFormData={updateFormData} onSubmit={handleStep1} isLoading={isLoading} />;
+            case 2: return <Step2 formData={formData} updateFormData={updateFormData} onSubmit={handleStep2} onBack={() => setCurrentStep(1)} handleProfilePicture={handleProfilePicture} />;
+            case 3: return <Step3 formData={formData} toggleGenre={toggleGenre} updateFormData={updateFormData} onSubmit={handleStep3} onBack={() => setCurrentStep(2)} />;
+            case 4: return <Step4 formData={formData} updateFormData={updateFormData} onSubmit={handleFinalSubmit} onBack={() => setCurrentStep(3)} isLoading={isLoading} />;
+            default: return null;
         }
     };
 
@@ -233,471 +383,247 @@ const handleFinalSubmit = async (e) => {
             {showSuccess && <AuthSuccess message="Profile created successfully!" onClose={() => navigate('/books')} />}
             {showFailure && <AuthFailure message={error} onClose={() => setShowFailure(false)} />}
             
-            <div className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 font-sans">
-                <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
-                    {/* Progress Bar */}
-                    <div className="mb-8">
-                        <div className="flex justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700">
-                                Step {currentStep} of 4
-                            </span>
-                            <span className="text-sm font-medium text-gray-700">
-                                {progress.toFixed(0)}%
-                            </span>
+            <div className="h-screen bg-chill-bg font-sans text-gray-200 selection:bg-chill-sage selection:text-black flex items-center justify-center p-4 overflow-hidden">
+                
+                {/* --- MAIN CARD CONTAINER (Constrained Height & Width) --- */}
+                <div className="max-w-5xl w-full max-h-[90vh] bg-chill-card shadow-2xl rounded-3xl border border-white/5 overflow-hidden flex flex-col md:flex-row h-full md:h-auto md:max-h-[90vh]">
+                    
+                    {/* --- LEFT SIDE: FORM (Scrollable) --- */}
+                    <div className="w-full md:w-1/2 p-6 md:p-8 relative z-10 flex flex-col overflow-y-auto hide-scrollbar">
+                        
+                        {/* Decorative Blur */}
+                        <div className="absolute top-0 left-0 w-32 h-32 bg-chill-sage/5 rounded-full blur-3xl transform -translate-x-10 -translate-y-10 pointer-events-none"></div>
+
+                        {/* Progress Bar */}
+                        <div className="mb-6 flex-shrink-0">
+                            <div className="flex justify-between mb-2">
+                                <span className="text-xs font-bold uppercase tracking-wider text-chill-sage">Step {currentStep} / 4</span>
+                                <span className="text-xs font-medium text-gray-500">{progress.toFixed(0)}%</span>
+                            </div>
+                            <div className="h-1.5 bg-chill-surface rounded-full overflow-hidden border border-white/5">
+                                <div className="h-full bg-chill-sage transition-all duration-300 shadow-glow-sage" style={{ width: `${progress}%` }}></div>
+                            </div>
                         </div>
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
-                                style={{ width: `${progress}%` }}
-                            ></div>
+
+                        {/* Render Active Step */}
+                        <div className="flex-grow flex flex-col justify-center animate-fadeIn">
+                            {renderStep()}
                         </div>
-                        <div className="flex justify-between mt-2">
-                            <span className="text-xs text-gray-500">Account</span>
-                            <span className="text-xs text-gray-500">Profile</span>
-                            <span className="text-xs text-gray-500">Preferences</span>
-                            <span className="text-xs text-gray-500">Complete</span>
+
+                        {/* Footer Link */}
+                        <div className="mt-6 pt-4 border-t border-white/5 text-center flex-shrink-0">
+                            <p className="text-xs text-gray-500">
+                                Already have an account?{' '}
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/login')}
+                                    className="font-bold text-chill-sage hover:text-chill-sand ml-1 transition duration-150 underline decoration-chill-sage/30 underline-offset-4"
+                                    disabled={isLoading}
+                                >
+                                    Log In
+                                </button>
+                            </p>
                         </div>
                     </div>
 
-                    {/* Form Container */}
-                    <div className="bg-white rounded-3xl shadow-soft border border-gray-100 p-8">
-                        {renderStep()}
+                    {/* --- RIGHT SIDE: IMAGE (Fixed) --- */}
+                    <div className="hidden md:block w-1/2 bg-chill-surface relative overflow-hidden group ">
+                        <div className="absolute inset-0 bg-chill-bg/20 z-10"></div>
+                        <img 
+                            src="./signup.png" 
+                            alt="Reading Nook" 
+                            className="absolute inset-0 w-full h-full object-cover opacity-60  transition-all duration-700 group-hover:scale-98 group-hover:grayscale-1 group-hover:opacity-80"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-chill-bg via-chill-bg/40 to-transparent opacity-90 z-20"></div>
+                        
+                        <div className="absolute bottom-0 left-0 right-0 p-10 z-30 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                            <div className="w-12 h-1 bg-chill-sage mb-4"></div>
+                            <blockquote className="text-xl font-serif text-white italic leading-relaxed mb-3">
+                                "A reader lives a thousand lives before he dies."
+                            </blockquote>
+                            <p className="text-chill-sage font-bold uppercase tracking-widest text-[10px]">
+                                - George R.R. Martin
+                            </p>
+                        </div>
                     </div>
-                </main>
+
+                </div>
             </div>
         </>
     );
 }
 
-// ========== STEP 1: Account Information ==========
+// ========== STEPS COMPONENTS ==========
+
 function Step1({ formData, updateFormData, onSubmit, isLoading }) {
     return (
         <div>
-            <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="w-8 h-8 text-white" />
+            <div className="text-center mb-6">
+                <div className="w-12 h-12 rounded-xl bg-chill-surface border border-chill-sage/20 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-chill-sage/10">
+                    <BookOpen className="w-6 h-6 text-chill-sage" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Create Your Account</h2>
-                <p className="text-gray-600 mt-2">Let's start with the basics</p>
+                <h2 className="text-2xl font-bold text-white">Create Account</h2>
+                <p className="text-sm text-gray-400 mt-1">Let's start with the basics</p>
             </div>
-
-            <form onSubmit={onSubmit} className="space-y-4">
+            <form onSubmit={onSubmit} className="space-y-3">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Display Name
-                    </label>
-                    <input
-                        type="text"
-                        required
-                        value={formData.displayName}
-                        onChange={(e) => updateFormData('displayName', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                        placeholder="How other readers will see you"
-                    />
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Display Name</label>
+                    <input type="text" required value={formData.displayName} onChange={(e) => updateFormData('displayName', e.target.value)} className="w-full px-4 py-2.5 bg-chill-surface border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-chill-sage focus:ring-1 focus:ring-chill-sage transition" placeholder="How other readers will see you" />
                 </div>
-                
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address
-                    </label>
-                    <input
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={(e) => updateFormData('email', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                        placeholder="your.email@example.com"
-                    />
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Email</label>
+                    <input type="email" required value={formData.email} onChange={(e) => updateFormData('email', e.target.value)} className="w-full px-4 py-2.5 bg-chill-surface border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-chill-sage focus:ring-1 focus:ring-chill-sage transition" placeholder="name@example.com" />
                 </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Password (min 6 characters)
-                    </label>
-                    <input
-                        type="password"
-                        required
-                        value={formData.password}
-                        onChange={(e) => updateFormData('password', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                        placeholder="Create a strong password"
-                    />
+                <div className="grid grid-cols-2 gap-3">
+                    <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Password</label>
+                        <input type="password" required value={formData.password} onChange={(e) => updateFormData('password', e.target.value)} className="w-full px-4 py-2.5 bg-chill-surface border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-chill-sage focus:ring-1 focus:ring-chill-sage transition" placeholder="******" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Confirm</label>
+                        <input type="password" required value={formData.confirmPassword} onChange={(e) => updateFormData('confirmPassword', e.target.value)} className="w-full px-4 py-2.5 bg-chill-surface border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-chill-sage focus:ring-1 focus:ring-chill-sage transition" placeholder="******" />
+                    </div>
                 </div>
-                
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Confirm Password
-                    </label>
-                    <input
-                        type="password"
-                        required
-                        value={formData.confirmPassword}
-                        onChange={(e) => updateFormData('confirmPassword', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                        placeholder="Re-enter your password"
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    className="w-full flex justify-center items-center py-3.5 px-4 rounded-xl text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition mt-6"
-                    disabled={isLoading}
-                >
-                    Continue to Profile Details <ChevronRight className="ml-2" />
+                <button type="submit" className="w-full flex justify-center items-center py-3 px-4 rounded-xl text-sm font-bold text-black bg-chill-sage hover:bg-chill-sand transition mt-4 shadow-glow-sage hover:scale-[1.01] active:scale-[0.99] duration-200" disabled={isLoading}>
+                    {isLoading ? <Loader size={18} className="animate-spin" /> : <>Next Step <ChevronRight className="ml-2 w-4 h-4" /></>}
                 </button>
             </form>
         </div>
     );
 }
 
-// ========== STEP 2: Personal Details ==========
 function Step2({ formData, updateFormData, onSubmit, onBack, handleProfilePicture }) {
+    const countries = Object.keys(LOCATIONS);
+    const cities = formData.country ? LOCATIONS[formData.country] || [] : [];
     return (
         <div>
-            <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center mx-auto mb-4">
-                    <Heart className="w-8 h-8 text-white" />
+            <div className="text-center mb-6">
+                <div className="w-12 h-12 rounded-xl bg-chill-surface border border-chill-rose/20 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-chill-rose/10">
+                    <Heart className="w-6 h-6 text-chill-rose" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Tell Us About Yourself</h2>
-                <p className="text-gray-600 mt-2">This helps us personalize your experience</p>
+                <h2 className="text-2xl font-bold text-white">About You</h2>
+                <p className="text-sm text-gray-400 mt-1">Personalize your experience</p>
             </div>
-
-            <form onSubmit={onSubmit} className="space-y-6">
-                {/* Profile Picture Upload */}
-                <div className="flex flex-col items-center mb-6">
-                    <div className="relative mb-4">
-                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-blue-100 to-purple-100">
-                            {formData.profilePicture ? (
-                                <img 
-                                    src={URL.createObjectURL(formData.profilePicture)} 
-                                    alt="Preview" 
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <span className="text-gray-400">No image</span>
-                                </div>
-                            )}
+            <form onSubmit={onSubmit} className="space-y-4">
+                <div className="flex items-center gap-4 bg-chill-surface/50 p-3 rounded-xl border border-white/5">
+                    <div className="relative w-16 h-16 flex-shrink-0">
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-chill-surface bg-chill-highlight">
+                            {formData.profilePicture ? <img src={URL.createObjectURL(formData.profilePicture)} alt="Preview" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Upload size={20} className="text-gray-500" /></div>}
                         </div>
-                        <label htmlFor="profile-upload" className="absolute bottom-2 right-2 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition shadow-md">
-                            <Upload size={20} className="text-white" />
-                            <input
-                                id="profile-upload"
-                                type="file"
-                                accept="image/*"
-                                onChange={handleProfilePicture}
-                                className="hidden"
-                            />
-                        </label>
+                        <label htmlFor="profile-upload" className="absolute -bottom-1 -right-1 w-6 h-6 bg-chill-sage rounded-full flex items-center justify-center cursor-pointer hover:bg-chill-sand transition border border-chill-bg"><Plus size={14} className="text-black" /><input id="profile-upload" type="file" accept="image/*" onChange={handleProfilePicture} className="hidden" /></label>
                     </div>
-                    <p className="text-sm text-gray-500">Add a profile picture (optional)</p>
-                </div>
-
-                {/* Gender */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Gender
-                    </label>
-                    <select
-                        value={formData.gender}
-                        onChange={(e) => updateFormData('gender', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                    >
-                        <option value="">Select gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                        <option value="prefer-not-to-say">Prefer not to say</option>
-                    </select>
-                </div>
-
-                {/* Birth Date */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <Calendar size={16} className="inline mr-2" />
-                        Date of Birth
-                    </label>
-                    <input
-                        type="date"
-                        value={formData.birthDate}
-                        onChange={(e) => updateFormData('birthDate', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                    />
-                </div>
-
-                {/* Location */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <MapPin size={16} className="inline mr-2" />
-                        Location
-                    </label>
-                    <div className="grid grid-cols-2 gap-4">
-                        <input
-                            type="text"
-                            value={formData.city}
-                            onChange={(e) => updateFormData('city', e.target.value)}
-                            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                            placeholder="City"
-                        />
-                        <input
-                            type="text"
-                            value={formData.country}
-                            onChange={(e) => updateFormData('country', e.target.value)}
-                            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                            placeholder="Country"
-                        />
+                    <div className="flex-grow">
+                        <p className="text-sm font-medium text-white">Profile Photo</p>
+                        <p className="text-xs text-gray-500">Optional. Max 2MB.</p>
                     </div>
                 </div>
-
-                {/* Navigation Buttons */}
-                <div className="flex gap-4 pt-6">
-                    <button
-                        type="button"
-                        onClick={onBack}
-                        className="flex-1 flex justify-center items-center py-3.5 px-4 rounded-xl text-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
-                    >
-                        <ChevronLeft className="mr-2" /> Back
-                    </button>
-                    <button
-                        type="submit"
-                        className="flex-1 flex justify-center items-center py-3.5 px-4 rounded-xl text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition"
-                    >
-                        Continue to Preferences <ChevronRight className="ml-2" />
-                    </button>
+                <div className="grid grid-cols-2 gap-3">
+                    <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Gender</label>
+                        <select value={formData.gender} onChange={(e) => updateFormData('gender', e.target.value)} className="w-full px-4 py-2.5 bg-chill-surface border border-white/10 rounded-xl text-white focus:outline-none focus:border-chill-sage focus:ring-1 focus:ring-chill-sage transition appearance-none text-sm h-12">
+                            <option value="">Select</option><option value="male">Male</option><option value="female">Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Birth Date</label>
+                        <input type="date" value={formData.birthDate} onChange={(e) => updateFormData('birthDate', e.target.value)} className="w-full px-4 py-2.5 bg-chill-surface border border-white/10 rounded-xl text-white focus:outline-none focus:border-chill-sage focus:ring-1 focus:ring-chill-sage transition [color-scheme:dark] text-sm h-12" />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Location</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="relative"><Autocomplete options={countries} value={formData.country} onChange={(val) => updateFormData('country', val)} placeholder="Country" /></div>
+                        <div className="relative"><Autocomplete options={cities} value={formData.city} onChange={(val) => updateFormData('city', val)} disabled={!formData.country} placeholder="City" /></div>
+                    </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                    <button type="button" onClick={onBack} className="flex-1 flex justify-center items-center py-3 px-4 rounded-xl text-base font-medium text-gray-300 bg-chill-surface border border-white/10 hover:bg-white/5 transition h-12"><ChevronLeft className="mr-2 w-4 h-4" /> Back</button>
+                    <button type="submit" className="flex-1 flex justify-center items-center py-3 px-4 rounded-xl text-base font-bold text-black bg-chill-sage hover:bg-chill-sand transition shadow-glow-sage h-12">Continue <ChevronRight className="ml-2 w-4 h-4" /></button>
                 </div>
             </form>
         </div>
     );
 }
 
-// ========== STEP 3: Reading Preferences ==========
 function Step3({ formData, toggleGenre, updateFormData, onSubmit, onBack }) {
     return (
         <div>
-            <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
-                    <Star className="w-8 h-8 text-white" />
+            <div className="text-center mb-6">
+                <div className="w-12 h-12 rounded-xl bg-chill-surface border border-chill-sand/20 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-chill-sand/10">
+                    <Star className="w-6 h-6 text-chill-sand" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Reading Preferences</h2>
-                <p className="text-gray-600 mt-2">Help us recommend the right books for you</p>
+                <h2 className="text-2xl font-bold text-white">Preferences</h2>
+                <p className="text-sm text-gray-400 mt-1">Select 3+ genres you love</p>
             </div>
-
-            <form onSubmit={onSubmit} className="space-y-6">
-                {/* Favorite Genres */}
+            <form onSubmit={onSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-4">
-                        Select your favorite genres (select 3-5)
-                    </label>
-                    <div className="flex flex-wrap gap-3">
+                    <label className="block text-xs font-medium text-gray-300 mb-3">Select your favorite genres (3-5)</label>
+                    <div className="flex flex-wrap gap-2">
                         {GENRES.map((genre) => (
-                            <button
-                                key={genre}
-                                type="button"
-                                onClick={() => toggleGenre(genre)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                    formData.favoriteGenres.includes(genre)
-                                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                            >
-                                {genre}
-                            </button>
+                            <button key={genre} type="button" onClick={() => toggleGenre(genre)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${formData.favoriteGenres.includes(genre) ? 'bg-chill-sage text-black shadow-lg shadow-chill-sage/20' : 'bg-chill-surface border border-white/10 text-gray-400 hover:text-white hover:border-white/20'}`}>{genre}</button>
                         ))}
                     </div>
-                    <p className="text-sm text-gray-500 mt-3">
-                        Selected: {formData.favoriteGenres.length} genres
-                    </p>
+                    <p className="text-xs text-gray-500 mt-2">Selected: {formData.favoriteGenres.length} genres</p>
                 </div>
-
-                {/* Reading Goal */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-4">
-                        What's your reading goal?
-                    </label>
-                    <div className="grid grid-cols-3 gap-4">
-                        {[
-                            { value: 'casual', label: 'Casual Reader', desc: 'A few books a year' },
-                            { value: 'regular', label: 'Regular Reader', desc: '1-2 books per month' },
-                            { value: 'avid', label: 'Avid Reader', desc: '3+ books per month' }
-                        ].map((option) => (
-                            <label
-                                key={option.value}
-                                className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${
-                                    formData.readingGoal === option.value
-                                        ? 'border-blue-500 bg-blue-50'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="readingGoal"
-                                    value={option.value}
-                                    checked={formData.readingGoal === option.value}
-                                    onChange={(e) => updateFormData('readingGoal', e.target.value)}
-                                    className="hidden"
-                                />
-                                <div className="text-center">
-                                    <div className="font-medium text-gray-800">{option.label}</div>
-                                    <div className="text-sm text-gray-600 mt-1">{option.desc}</div>
-                                </div>
+                    <label className="block text-xs font-medium text-gray-300 mb-3">What's your reading goal?</label>
+                    <div className="grid grid-cols-3 gap-2">
+                        {[{ value: 'casual', label: 'Casual', desc: '< 5/yr' }, { value: 'regular', label: 'Regular', desc: '1/mo' }, { value: 'avid', label: 'Avid', desc: '3+/mo' }].map((option) => (
+                            <label key={option.value} className={`cursor-pointer p-3 rounded-lg border transition-all text-center ${formData.readingGoal === option.value ? 'border-chill-sage bg-chill-sage/10 shadow-glow-sage' : 'border-white/10 bg-chill-surface hover:border-white/20'}`}>
+                                <input type="radio" name="readingGoal" value={option.value} checked={formData.readingGoal === option.value} onChange={(e) => updateFormData('readingGoal', e.target.value)} className="hidden" />
+                                <div className={`text-sm font-medium ${formData.readingGoal === option.value ? 'text-chill-sage' : 'text-gray-300'}`}>{option.label}</div>
+                                <div className="text-xs text-gray-500 mt-0.5">{option.desc}</div>
                             </label>
                         ))}
                     </div>
                 </div>
-
-                {/* Navigation Buttons */}
-                <div className="flex gap-4 pt-6">
-                    <button
-                        type="button"
-                        onClick={onBack}
-                        className="flex-1 flex justify-center items-center py-3.5 px-4 rounded-xl text-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
-                    >
-                        <ChevronLeft className="mr-2" /> Back
-                    </button>
-                    <button
-                        type="submit"
-                        className="flex-1 flex justify-center items-center py-3.5 px-4 rounded-xl text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition"
-                    >
-                        Complete Setup <ChevronRight className="ml-2" />
-                    </button>
+                <div className="flex gap-3 pt-4">
+                    <button type="button" onClick={onBack} className="flex-1 flex justify-center items-center py-3 px-4 rounded-xl text-base font-medium text-gray-300 bg-chill-surface border border-white/10 hover:bg-white/5 transition h-12"><ChevronLeft className="mr-2 w-4 h-4" /> Back</button>
+                    <button type="submit" className="flex-1 flex justify-center items-center py-3 px-4 rounded-xl text-base font-bold text-black bg-chill-sage hover:bg-chill-sand transition shadow-glow-sage h-12">Next Step</button>
                 </div>
             </form>
         </div>
     );
 }
 
-// ========== STEP 4: Final Review & Submit ==========
 function Step4({ formData, updateFormData, onSubmit, onBack, isLoading }) {
     return (
         <div>
-            <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center mx-auto mb-4">
-                    <Star className="w-8 h-8 text-white" />
+            <div className="text-center mb-6">
+                <div className="w-12 h-12 rounded-xl bg-chill-surface border border-chill-blue/20 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-chill-blue/10">
+                    <CheckCircle className="w-6 h-6 text-chill-blue" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Complete Your Profile</h2>
-                <p className="text-gray-600 mt-2">Review your information and finish setup</p>
+                <h2 className="text-2xl font-bold text-white">Review & Finish</h2>
+                <p className="text-sm text-gray-400 mt-1">Almost there!</p>
             </div>
-
-            <form onSubmit={onSubmit} className="space-y-6">
-                {/* Review Summary */}
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
-                    <h3 className="font-bold text-lg text-gray-800 mb-4">Profile Summary</h3>
-                    
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">Display Name</p>
-                                <p className="font-medium">{formData.displayName}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Email</p>
-                                <p className="font-medium">{formData.email}</p>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <p className="text-sm text-gray-500">Favorite Genres</p>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                {formData.favoriteGenres.slice(0, 5).map((genre) => (
-                                    <span key={genre} className="px-3 py-1 bg-white text-blue-600 rounded-full text-xs font-medium border border-blue-200">
-                                        {genre}
-                                    </span>
-                                ))}
-                                {formData.favoriteGenres.length > 5 && (
-                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                                        +{formData.favoriteGenres.length - 5} more
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">Reading Level</p>
-                                <p className="font-medium capitalize">{formData.readingGoal} Reader</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Location</p>
-                                <p className="font-medium">
-                                    {formData.city && formData.country ? `${formData.city}, ${formData.country}` : 'Not specified'}
-                                </p>
-                            </div>
-                        </div>
+            <form onSubmit={onSubmit} className="space-y-4">
+                <div className="bg-chill-surface rounded-xl p-4 border border-white/5 text-sm">
+                    <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-2">
+                        <span className="text-gray-500">Name</span>
+                        <span className="text-white font-medium">{formData.displayName}</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-2">
+                        <span className="text-gray-500">Email</span>
+                        <span className="text-white font-medium truncate max-w-[150px]">{formData.email}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-gray-500">Goal</span>
+                        <span className="text-chill-sage font-medium capitalize">{formData.readingGoal} Reader</span>
                     </div>
                 </div>
-
-                {/* Final Book Setup (Optional) */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Your All-Time Favorite Book (Optional)
-                    </label>
-                    <input
-                        type="text"
-                        value={formData.favoriteBook}
-                        onChange={(e) => updateFormData('favoriteBook', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                        placeholder="e.g., Pride and Prejudice"
-                    />
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Favorite Book</label>
+                    <input type="text" value={formData.favoriteBook} onChange={(e) => updateFormData('favoriteBook', e.target.value)} className="w-full px-4 py-2.5 bg-chill-surface border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-chill-sage focus:ring-1 focus:ring-chill-sage transition text-sm" placeholder="e.g. Harry Potter" />
                 </div>
-
-                {/* Terms */}
-                <div className="flex items-start">
-                    <input
-                        type="checkbox"
-                        id="terms"
-                        required
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 mt-1"
-                    />
-                    <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-                        I agree to create a personalized reading profile and receive book recommendations.
-                        This information will be displayed on my public profile page.
-                    </label>
+                <div className="flex items-start gap-3 bg-chill-highlight/30 p-3 rounded-lg border border-white/5">
+                    <input type="checkbox" id="terms" required className="mt-0.5 w-4 h-4 text-chill-sage bg-chill-surface border-white/20 rounded focus:ring-chill-sage accent-chill-sage" />
+                    <label htmlFor="terms" className="text-xs text-gray-400 leading-relaxed cursor-pointer select-none">I agree to the Terms of Service and Privacy Policy.</label>
                 </div>
-
-                {/* Navigation Buttons */}
-                <div className="flex gap-4 pt-6">
-                    <button
-                        type="button"
-                        onClick={onBack}
-                        className="flex-1 flex justify-center items-center py-3.5 px-4 rounded-xl text-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
-                        disabled={isLoading}
-                    >
-                        <ChevronLeft className="mr-2" /> Back
-                    </button>
-                    <button
-                        type="submit"
-                        className="flex-1 flex justify-center items-center py-3.5 px-4 rounded-xl text-lg font-bold text-white bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 transition disabled:opacity-50"
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader size={20} className="animate-spin mr-2" />
-                                Creating Profile...
-                            </>
-                        ) : (
-                            'Complete Sign Up'
-                        )}
-                    </button>
+                <div className="flex gap-3 pt-2">
+                    <button type="button" onClick={onBack} className="px-4 py-3 rounded-xl text-sm font-bold text-gray-400 bg-chill-surface hover:bg-white/5 transition" disabled={isLoading}><ChevronLeft className="w-5 h-5" /></button>
+                    <button type="submit" className="flex-1 py-3 px-4 rounded-xl text-sm font-bold text-black bg-chill-sage hover:bg-chill-sand transition shadow-glow-sage disabled:opacity-50 disabled:cursor-not-allowed" disabled={isLoading}>{isLoading ? <Loader size={18} className="animate-spin mx-auto" /> : 'Create Account'}</button>
                 </div>
             </form>
         </div>
     );
-}
-
-// Helper function for uploading profile picture
-async function uploadProfilePicture(uid, file) {
-    const formData = new FormData();
-    formData.append('profilePicture', file);
-    formData.append('uid', uid);
-    
-    const response = await fetch('/api/users/upload-profile-picture', {
-        method: 'POST',
-        body: formData
-    });
-    
-    if (!response.ok) {
-        throw new Error('Failed to upload profile picture');
-    }
-    
-    return response.json();
 }

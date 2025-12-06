@@ -76,6 +76,32 @@ export const useUserProfile = () => {
     }
   };
 
+  const checkAvailability = async (field, value) => {
+    try {
+      if (!currentUser) return { success: false, message: 'User not authenticated' };
+      
+      const token = await getIdToken();
+      
+      // Using full URL to match createProfile pattern
+      const response = await fetch(`http://localhost:5000/api/users/profile/check-availability?field=${field}&value=${encodeURIComponent(value)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to check availability');
+      }
+
+      return await response.json();
+    } catch (err) {
+      console.error("Availability Check Failed:", err);
+      throw err;
+    }
+  };
+
   const updateProfile = async (updates) => {
     try {
       const token = await getIdToken();
@@ -245,6 +271,7 @@ export const useUserProfile = () => {
     error,
     fetchProfile,
     createProfile,
+    checkAvailability,
     updateProfile,
     addToBookshelf,
     getBookshelf,

@@ -1,5 +1,6 @@
 // src/api/books.js
 // For development, use localhost; for production, use relative path
+
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? '/api'  // Vercel will rewrite this
   : 'http://localhost:5000/api';
@@ -46,6 +47,152 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 // Book API functions
+
+
+// frontend/src/api/books.js - CORRECTED
+
+export const hybridSearchBooks = async (query, params = {}) => {
+  try {
+    const queryString = new URLSearchParams({
+      query,
+      limit: params.limit || 24,
+      page: params.page || 1
+    }).toString();
+    
+    const response = await fetch(`${API_BASE_URL}/search/hybrid?${queryString}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error performing hybrid search:', error);
+    return { success: false, message: 'Failed to perform hybrid search' };
+  }
+};
+
+export const simpleSearchBooks = async (query, params = {}) => {
+  try {
+    const queryString = new URLSearchParams({
+      query,
+      limit: params.limit || 24,
+      page: params.page || 1
+    }).toString();
+    
+    const response = await fetch(`${API_BASE_URL}/search/simple?${queryString}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error performing simple search:', error);
+    return { success: false, message: 'Failed to perform simple search' };
+  }
+};
+
+export const quickSearchBooks = async (query, params = {}) => {
+  try {
+    const queryString = new URLSearchParams({
+      q: query,
+      limit: params.limit || 10
+    }).toString();
+    
+    const response = await fetch(`${API_BASE_URL}/search/quick?${queryString}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error performing quick search:', error);
+    return { success: false, message: 'Failed to perform quick search' };
+  }
+};
+// frontend/src/api/books.js - Add paginated endpoint
+export const fetchBooksPaginated = async (params = {}) => {
+  try {
+    const queryString = new URLSearchParams({
+      page: params.page || 1,
+      limit: params.limit || 24,
+      ...(params.search && { search: params.search }),
+      ...(params.genre && { genre: params.genre }),
+      ...(params.category && { category: params.category }),
+      ...(params.author && { author: params.author }),
+      ...(params.sortBy && { sortBy: params.sortBy }),
+      ...(params.sortOrder && { sortOrder: params.sortOrder })
+    }).toString();
+    
+    const response = await fetch(`${API_BASE_URL}/books/paginated?${queryString}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching paginated books:', error);
+    return { success: false, message: 'Failed to fetch books' };
+  }
+};
+
+// Review functions
+export async function fetchBookReviews(bookId, params = {}) {
+  const queryString = new URLSearchParams(params).toString();
+  return apiRequest(`/reviews/book/${bookId}${queryString ? `?${queryString}` : ''}`);
+}
+
+export async function createBookReview(bookId, reviewData) {
+  return apiRequest(`/reviews/book/${bookId}`, {
+    method: 'POST',
+    body: JSON.stringify(reviewData),
+  });
+}
+
+export async function updateReview(reviewId, reviewData) {
+  return apiRequest(`/reviews/${reviewId}`, {
+    method: 'PUT',
+    body: JSON.stringify(reviewData),
+  });
+}
+
+export async function deleteReview(reviewId) {
+  return apiRequest(`/reviews/${reviewId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function markReviewHelpful(reviewId) {
+  return apiRequest(`/reviews/${reviewId}/helpful`, {
+    method: 'POST',
+  });
+}
+
+// User profile functions
+export async function fetchUserProfile() {
+  return apiRequest('/users/profile');
+}
+
+export async function updateUserProfile(profileData) {
+  return apiRequest('/users/profile', {
+    method: 'PUT',
+    body: JSON.stringify(profileData),
+  });
+}
+
+export async function createUserProfile(profileData) {
+  return apiRequest('/users/profile/create', {
+    method: 'POST',
+    body: JSON.stringify(profileData),
+  });
+}
+
+// Bookshelf functions
+export async function addToBookshelf(bookId, shelfType) {
+  return apiRequest(`/users/bookshelves/${shelfType}/${bookId}`, {
+    method: 'POST',
+  });
+}
+
+export async function removeFromBookshelf(bookId, shelfType) {
+  return apiRequest(`/users/bookshelves/${shelfType}/${bookId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function fetchUserBookshelf(shelfType) {
+  return apiRequest(`/users/bookshelves/${shelfType}`);
+}
+
+// Check username/email availability
+export async function checkAvailability(field, value) {
+  return apiRequest(`/users/profile/check-availability?field=${field}&value=${encodeURIComponent(value)}`);
+}
+
+
 export async function fetchAllBooks(params = {}) {
   const queryString = new URLSearchParams(params).toString();
   const endpoint = `/books${queryString ? `?${queryString}` : ''}`;
@@ -112,15 +259,73 @@ export async function fetchFeaturedBooks(limit = 8) {
 }
 
 export async function fetchBooksByGenre(genre, limit = 10) {
-  return apiRequest(`/books/genre/${genre}?limit=${limit}`);
+  try {
+    const encodedGenre = encodeURIComponent(genre);
+    const response = await fetch(`${API_BASE_URL}/books/genre/${encodedGenre}?limit=${limit}`);
+    const data = await response.json();
+    
+    console.log(`API: Fetched ${data.data?.length || 0} books for genre "${genre}"`);
+    
+    if (!response.ok) {
+      throw new Error(data.message || `Failed to fetch ${genre} books`);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error(`Error fetching ${genre} books:`, error);
+    return { 
+      success: false, 
+      message: error.message,
+      data: [] 
+    };
+  }
 }
-
 export async function fetchHighlyReviewedBooks(limit = 8) {
   return apiRequest(`/books/community/reviews?limit=${limit}`);
 }
 
 export async function fetchHomepageStats() {
   return apiRequest('/books/stats/homepage');
+}
+
+// Add to src/api/books.js
+export async function fetchBecauseYouLiked(options = {}) {
+  const queryString = new URLSearchParams(options).toString();
+  return apiRequest(`/books/because-you-liked${queryString ? `?${queryString}` : ''}`);
+}
+
+
+// Recommendations functions
+// In fetchRecommendations function, add more logging
+export async function fetchRecommendations(options = {}) {
+  console.log('📞 fetchRecommendations called with options:', options);
+  
+  const token = await getAuthToken();
+  const currentUser = (await import('../firebase/config')).auth.currentUser;
+  
+  console.log('👤 Current user:', currentUser?.uid);
+  console.log('🔑 Token available:', !!token);
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+    ...(currentUser?.uid && { 'firebaseuid': currentUser.uid }),
+  };
+  
+  console.log('📋 Request headers:', headers);
+  
+  const queryString = new URLSearchParams(options).toString();
+  const endpoint = `/books/similar-recommendations${queryString ? `?${queryString}` : ''}`;
+  
+  console.log('🌐 Calling endpoint:', endpoint);
+  
+  const response = await apiRequest(endpoint, { headers });
+  console.log('✅ Response received:', response);
+  
+  return response;
+}
+export async function fetchRelatedBooks(bookId, limit = 10) {
+  return apiRequest(`/books/${bookId}/related?limit=${limit}`);
 }
 
 // Get all homepage data in one call
@@ -167,6 +372,8 @@ export async function fetchHomepageData() {
         stats: processResponse(statsResponse, null)
       }
     };
+
+    
 
   } catch (error) {
     console.error('[API] Failed to fetch homepage data:', error);

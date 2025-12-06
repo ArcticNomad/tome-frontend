@@ -28,10 +28,8 @@ const BookSection = ({ title, books = [], isLoading = false, showViewAll = true,
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          {title}
-          <span className="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-            {books.length}
-          </span>
+          
+         
         </h2>
 
         {showViewAll && books.length > 0 && (
