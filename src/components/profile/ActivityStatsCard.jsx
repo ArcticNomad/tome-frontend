@@ -112,9 +112,9 @@ const ActivityStatsCard = ({
           My Bookshelves
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <ShelfLink to="/bookshelf/currently-reading" label="Reading" count={currentlyReadingCount} color="text-chill-blue" />
-          <ShelfLink to="/bookshelf/want-to-read" label="Want to Read" count={wantToReadCount} color="text-chill-sage" />
-          <ShelfLink to="/bookshelf/read" label="Finished" count={readCount} color="text-purple-400" />
+          <ShelfLink to="/library" label="Reading" count={currentlyReadingCount} color="text-chill-blue" />
+          <ShelfLink to="/library" label="Want to Read" count={wantToReadCount} color="text-chill-sage" />
+          <ShelfLink to="/library" label="Finished" count={readCount} color="text-purple-400" />
         </div>
       </div>
     </div>

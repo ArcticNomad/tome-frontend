@@ -6,10 +6,10 @@ import HorizontalCarousel from '../components/HomePage/HorizontalCarousel';
 import Footer from '../components/HomePage/Footer';
 import UserInfo from '../components/HomePage/UserInfo';
 import LoadingSpinner from '../components/LoadingSpinner';
-
+import { Sparkles } from 'lucide-react';
 import { useHomepageData } from '../hooks/useHomepageData';
 import { useAuth } from '../hooks/useAuth';
-
+import { BookOpen } from 'lucide-react';
 // Import new modular components
 import BooksTabs from '../components/books/BooksTabs';
 import PaidBooksPlaceholder from '../components/books/PaidBooksPlaceholder';
@@ -125,12 +125,29 @@ function Books() {
 
             {/* Recently Added Section */}
             <section className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-2 h-8 bg-chill-sage rounded-full"></div>
-                <h2 className="text-3xl font-bold text-white">
-                  Recently Added
-                </h2>
-              </div>
+              <div className="relative flex items-center gap-5 py-2 group cursor-default">
+  {/* Animated Vertical Bar */}
+  <div className="w-1.5 h-8 bg-[#D4E09B] rounded-full shadow-[0_0_15px_rgba(212,224,155,0.3)] transition-all duration-500 ease-out group-hover:h-12 group-hover:bg-[#EAD2AC] group-hover:shadow-[0_0_20px_rgba(234,210,172,0.4)]" />
+  
+  <div className="relative flex items-center gap-5 py-2 group cursor-default">
+  {/* Animated Vertical Bar */}
+ 
+  
+  <div className="flex flex-col">
+    <div className="flex items-center gap-3">
+      <h2 className="text-3xl font-bold text-white tracking-tight group-hover:text-[#EAD2AC] transition-colors duration-300">
+        Recently Added
+      </h2>
+      <Sparkles className="w-5 h-5 text-[#D4E09B] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-out" />
+    </div>
+    
+    {/* Subtitle that reveals on hover */}
+    <span className="text-xs font-medium text-[#9CAFB7] tracking-widest uppercase opacity-0 -translate-y-1 h-0 group-hover:h-auto group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
+      Fresh arrivals this week
+    </span>
+  </div>
+</div>
+</div>
               
               <HorizontalCarousel 
                 title="New Arrivals" 
@@ -141,12 +158,24 @@ function Books() {
 
             {/* All Books Collection */}
             <section className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-2 h-8 bg-chill-blue rounded-full"></div>
-                <h2 className="text-3xl font-bold text-white">
-                  Browse All Books
-                </h2>
-              </div>
+            <div className="relative flex items-center gap-5 py-4 group cursor-pointer mb-8">
+  {/* Animated Vertical Bar - Blue Accent */}
+  <div className="w-1.5 h-8 bg-chill-sage rounded-full shadow-[0_0_15px_rgba(156,175,183,0.3)] transition-all duration-500 ease-out group-hover:h-12 group-hover:bg-[#EAD2AC] group-hover:shadow-[0_0_20px_rgba(156,175,183,0.4)]" />
+  
+  <div className="flex flex-col justify-center">
+    <div className="flex items-center gap-3">
+      <h2 className="text-3xl font-bold text-white tracking-tight group-hover:text-chill-sage transition-colors duration-300">
+        Browse All Books
+      </h2>
+      <BookOpen className="w-6 h-6 text-[#9CAFB7] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-out" />
+    </div>
+    
+    {/* Subtitle reveal */}
+    <span className="text-xs font-medium text-[#9CAFB7]/80 tracking-[0.2em] uppercase opacity-0 -translate-y-2 h-0 group-hover:h-auto group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
+      Complete Collection
+    </span>
+  </div>
+</div>
               
               <BookSection 
                 title="all" 

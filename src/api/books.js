@@ -124,6 +124,35 @@ export async function fetchBookReviews(bookId, params = {}) {
   const queryString = new URLSearchParams(params).toString();
   return apiRequest(`/reviews/book/${bookId}${queryString ? `?${queryString}` : ''}`);
 }
+export async function fetchUserReviews(userId = '') {
+  try {
+    const token = await getAuthToken();
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    };
+    
+    // For current user's reviews
+    const endpoint = '/reviews/user/mine';
+    
+    const url = `${API_BASE_URL}${endpoint}`;
+    const response = await fetch(url, { headers });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching user reviews:', error);
+    return { 
+      success: false, 
+      message: error.message,
+      data: [] 
+    };
+  }
+}
 
 export async function createBookReview(bookId, reviewData) {
   return apiRequest(`/reviews/book/${bookId}`, {

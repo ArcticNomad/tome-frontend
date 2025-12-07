@@ -4,6 +4,7 @@ import { ThumbsUp, Star } from 'lucide-react';
 import { useBecauseYouLiked } from '../../hooks/useBecauseYouLiked';
 import HorizontalCarousel from '../HomePage/HorizontalCarousel';
 import LoadingSpinner from '../LoadingSpinner';
+import { BookOpen, Sparkles } from 'lucide-react';
 
 const BecauseYouLikedSection = ({ currentUser }) => {
   const {
@@ -22,40 +23,88 @@ const BecauseYouLikedSection = ({ currentUser }) => {
 
   return (
     <section className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-chill-blue to-chill-lavender rounded-xl flex items-center justify-center">
-            <ThumbsUp className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold text-white">
-              Because You Liked
-            </h2>
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-gray-400">
-                {sourceBook ? message : 'Based on your ratings'}
-              </p>
-              {source && (
-                <span className="text-xs px-2 py-1 rounded-full bg-chill-blue/20 text-chill-blue border border-chill-blue/30">
-                  {source.replace(/_/g, ' ')}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500 font-medium">
-            {recommendations.length} books
-          </span>
-          <button 
-            onClick={refresh}
-            className="text-sm text-chill-blue hover:text-white transition-colors p-1 hover:bg-white/5 rounded"
-            title="Get new recommendations"
-          >
-            ↻
-          </button>
+    <div className="relative group p-8 bg-chill-surface/40 backdrop-blur-2xl rounded-3xl 
+                border border-white/8 shadow-2xl overflow-hidden isolate
+                before:absolute before:inset-0 before:bg-gradient-to-br 
+                before:from-chill-sage/5 before:via-chill-lavender/3 before:to-chill-rose/5 
+                before:-z-10 before:transition-all before:duration-1000
+                hover:before:from-chill-sage/10 hover:before:to-chill-rose/8">
+
+  {/* Soft Floating Orbs – tuned to your palette */}
+  <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full 
+                  bg-gradient-to-br from-chill-sage/30 to-chill-blue/20 blur-3xl 
+                  animate-pulse"></div>
+  <div className="absolute -bottom-40 -left-20 w-96 h-96 rounded-full 
+                  bg-gradient-to-tl from-chill-rose/20 via-chill-lavender/10 to-transparent 
+                  blur-3xl animate-pulse delay-700"></div>
+
+  {/* Subtle Floating Dust (feels like calm night air) */}
+  <div className="absolute inset-0 opacity-20 pointer-events-none">
+    {[...Array(7)].map((_, i) => (
+      <div
+        key={i}
+        className="absolute w-1 h-1 bg-chill-sage rounded-full animate-float"
+        style={{
+          left: `${15 + i * 13}%`,
+          top: `${10 + i * 11}%`,
+          animationDelay: `${i * 1.4}s`,
+          animationDuration: `${20 + i * 5}s`
+        }}
+      />
+    ))}
+  </div>
+
+  <div className="relative z-10 flex items-center gap-9">
+
+    {/* Icon: Elegant Open Book with Gentle Glow */}
+    <div className="relative">
+      <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-chill-sage/20 via-chill-lavender/10 to-chill-rose/20
+                      p-1 shadow-xl backdrop-blur-md border border-white/10
+                      transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
+        <div className="w-full h-full rounded-2xl bg-chill-card/80 backdrop-blur-xl 
+                        flex items-center justify-center border border-white/10">
+          <BookOpen className="w-10 h-10 text-chill-sage drop-shadow-lg" />
+          
+          {/* Tiny floating sparkles – very subtle */}
+          <Sparkles className="absolute top-1 right-1 w-4 h-4 text-chill-sage/80 animate-pulse" />
+          <Sparkles className="absolute bottom-1 left-1 w-3 h-3 text-chill-rose/70 animate-ping delay-500" />
         </div>
       </div>
+
+      {/* Soft outer halo */}
+      <div className="absolute -inset-6 rounded-full bg-chill-sage/10 blur-3xl -z-10 
+                      animate-pulse opacity-60"></div>
+    </div>
+
+    {/* Text – clean, luxurious, perfectly readable */}
+    <div className="space-y-3">
+      <h2 className="text-4xl font-black tracking-tight text-white">
+        Because You Loved
+      </h2>
+
+      <div className="flex items-center gap-4 flex-wrap">
+        <p className="text-gray-300 text-base font-medium leading-relaxed">
+          {sourceBook ? message : 'Hand-picked from your reading soul'}
+        </p>
+
+        {source && (
+          <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full
+                          bg-chill-card/50 border border-white/10 backdrop-blur-md
+                          hover:bg-chill-card/70 transition-all duration-300">
+            <div className="w-1.5 h-1.5 bg-chill-sage rounded-full animate-ping"></div>
+            <span className="text-chill-sage text-sm font-semibold tracking-wider uppercase">
+              {source.replace(/_/g, ' ')}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+
+  {/* Minimal bottom accent */}
+  <div className="absolute bottom-0 left-8 right-8 h-px bg-gradient-to-r 
+                  from-transparent via-chill-sage/30 to-transparent"></div>
+</div>
       
       {/* Source book card if available */}
       {sourceBook && (

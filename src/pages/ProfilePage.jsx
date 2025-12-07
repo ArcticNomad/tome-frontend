@@ -42,16 +42,12 @@ useEffect(() => {
   const fetchAdditionalData = async () => {
     if (profile) {
       try {
-        // 1. Fetch statistics - ensure this is called
         const statsRes = await getUserStats();
         if (statsRes.success) {
-          console.log('User Stats:', statsRes.data); // Debug log
+          console.log('User Stats:', statsRes.data);
           setUserStats(statsRes.data);
-        } else {
-          console.error('Failed to fetch stats:', statsRes);
         }
-        
-        // 2. Fetch bookshelves
+
         const [readingRes, wantRes, readRes] = await Promise.all([
           getBookshelf('currentlyReading'),
           getBookshelf('wantToRead'),
@@ -61,15 +57,16 @@ useEffect(() => {
         if (readingRes.success) setCurrentlyReading(readingRes.data);
         if (wantRes.success) setWantToReadCount(wantRes.data.length);
         if (readRes.success) setReadCount(readRes.data.length);
-        
+
       } catch (err) {
         console.error("Error fetching data:", err);
       }
     }
   };
-  
+
   fetchAdditionalData();
-}, [profile, getUserStats, getBookshelf]); // Add dependencies
+}, [profile]);   // ✅ THE FIX
+
   const handleEdit = () => {
     setIsEditing(true);
     setEditForm({

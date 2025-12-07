@@ -1,80 +1,69 @@
+// frontend/src/components/BookCard.jsx
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Heart, ShoppingBag, Download, Bookmark, Plus, Check, Star } from 'lucide-react';
-import { Link, BrowserRouter } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
-// --- Internal Mock Components & Hooks (to fix dependency errors) ---
-
-const StarRating = ({ rating }) => {
+// --- StarRating Component ---
+const StarRating = ({ rating = 0 }) => {
   return (
     <div className="flex items-center gap-0.5">
       {[...Array(5)].map((_, i) => (
         <Star 
           key={i} 
           size={12} 
-          className={i < Math.round(rating) ? "fill-[#D4E09B] text-[#D4E09B]" : "text-gray-600"} 
+          className={
+            i < Math.round(rating) 
+              ? "fill-[#D4E09B] text-[#D4E09B]" 
+              : "text-gray-600"
+          } 
         />
       ))}
-      <span className="text-xs text-gray-500 ml-1">{rating}</span>
+      <span className="text-xs text-gray-500 ml-1">{rating.toFixed(1)}</span>
     </div>
   );
 };
 
-const useAuth = () => {
-  // Mock authenticated user
-  return { 
-    currentUser: { 
-      uid: 'mock-user-123', 
-      getIdToken: async () => 'mock-token' 
-    } 
-  };
-};
-
-const useUserProfile = () => {
-  return {
-    profile: { favoriteBooks: [] },
-    addToBookshelf: async () => console.log("Added to bookshelf"),
-    toggleFavorite: async () => console.log("Toggled favorite"),
-    getBookStatus: async () => null // Returns 'read', 'wantToRead', etc. or null
-  };
-};
-
-// --- Main Component ---
-
-const BookCard = ({ book = {} }) => {
-  // Default book prop for preview if none provided
-  const defaultBook = {
-    _id: '1',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    coverImageUrl: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=400',
-    downloadCount: 60000,
-    gutenbergId: '123'
-  };
-  
-  const activeBook = book && book.title ? book : defaultBook;
-
+// --- Main BookCard Component ---
+const BookCard = ({ book = {}, onBookshelfUpdate }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [showBookshelfMenu, setShowBookshelfMenu] = useState(false);
   const [isInBookshelf, setIsInBookshelf] = useState('');
-  const [imageSrc, setImageSrc] = useState(activeBook.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Cover');
+  const [imageSrc, setImageSrc] = useState('');
   
   const { currentUser } = useAuth();
   const { 
     addToBookshelf, 
     toggleFavorite, 
     profile,
-    getBookStatus 
+    getBookStatus,
+    removeFromBookshelf
   } = useUserProfile();
+
+  // Set initial image source
+
+useEffect(() => {
+  if (book?.coverImageUrl && typeof book.coverImageUrl === 'string' && book.coverImageUrl.trim() !== '') {
+    setImageSrc(book.coverImageUrl);
+  } else {
+    setImageSrc('https://via.placeholder.com/300x450?text=No+Cover');
+  }
+}, [book]);
+
 
   // Check if book is in any bookshelf
   useEffect(() => {
     let isMounted = true;
 
-    const checkStatus = async () => {
-      if (!currentUser || !activeBook._id) return;
+    const checkBookshelfStatus = async () => {
+      if (!currentUser || !book?._id) {
+        setIsInBookshelf('');
+        return;
+      }
       
       try {
-        const status = await getBookStatus(activeBook._id);
+        const status = await getBookStatus(book._id);
         if (isMounted && status) {
           setIsInBookshelf(status);
         }
@@ -83,26 +72,49 @@ const BookCard = ({ book = {} }) => {
       }
    };
 
-    checkStatus();
+    checkBookshelfStatus();
 
     return () => { isMounted = false; };
-  }, [currentUser, activeBook._id]);
+  }, [currentUser, book?._id]);
 
+  // Check if book is liked/favorited
   useEffect(() => {
-    setImageSrc(activeBook.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Cover');
-  }, [activeBook.coverImageUrl]);
+    if (profile?.favoriteBooks && book?._id) {
+      setIsLiked(profile.favoriteBooks.includes(book._id));
+    }
+  }, [profile, book?._id]);
 
-  const handleError = () => {
-    setImageSrc('https://via.placeholder.com/300x450?text=Error');
+  const handleImageError = () => {
+    setImageSrc('https://via.placeholder.com/300x450?text=Error+Loading+Image');
   };
 
   const handleAddToBookshelf = async (shelfType) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log('Please sign in to add books to your library');
+      return;
+    }
+    
+    if (!book?._id) {
+      console.error('No book ID provided');
+      return;
+    }
+
     try {
-      await addToBookshelf(activeBook._id, shelfType, activeBook.gutenbergId);
-      setIsInBookshelf(shelfType);
-      setShowBookshelfMenu(false);
-      showToast(`Added to ${getShelfName(shelfType)}!`);
+      const result = await addToBookshelf(book._id, shelfType, book.gutenbergId);
+      
+      if (result.success) {
+        setIsInBookshelf(shelfType);
+        setShowBookshelfMenu(false);
+        
+        // Call callback if provided
+        if (onBookshelfUpdate) {
+          onBookshelfUpdate(book._id, shelfType);
+        }
+        
+        console.log(`Added to ${getShelfName(shelfType)}!`);
+      } else {
+        console.error('Failed to add to bookshelf:', result.message);
+      }
     } catch (error) {
       console.error('Error adding to bookshelf:', error);
     }
@@ -110,20 +122,64 @@ const BookCard = ({ book = {} }) => {
 
   const handleToggleFavorite = async (e) => {
     e.stopPropagation();
-    if (!currentUser) return;
+    
+    if (!currentUser) {
+      console.log('Please sign in to add favorites');
+      return;
+    }
+    
+    if (!book?._id) {
+      console.error('No book ID provided');
+      return;
+    }
+
     try {
-      await toggleFavorite(activeBook._id);
+      await toggleFavorite(book._id);
       setIsLiked(!isLiked);
-      showToast(isLiked ? 'Removed from favorites' : 'Added to favorites!');
+      console.log(isLiked ? 'Removed from favorites' : 'Added to favorites!');
     } catch (error) {
       console.error('Error toggling favorite:', error);
     }
   };
 
-  const handleRemoveFromBookshelf = async () => {
-    setIsInBookshelf('');
-    showToast('Removed from bookshelf');
-  };
+ const handleRemoveFromBookshelf = async (e) => {
+  e?.stopPropagation();
+  
+  if (!currentUser || !book?._id) {
+    console.log('No user or book ID');
+    return;
+  }
+  
+  if (!isInBookshelf) {
+    console.log('Book is not in any bookshelf');
+    return;
+  }
+  
+  try {
+    // Use gutenbergId (backend expects this based on logs)
+    const bookIdToRemove = book.gutenbergId || book._id;
+    
+    // Call the API
+    const result = await removeFromBookshelf(bookIdToRemove, isInBookshelf);
+    
+    if (result.success) {
+      // Update local state
+      setIsInBookshelf('');
+      setShowBookshelfMenu(false);
+      
+      // Call callback if provided
+      if (onBookshelfUpdate) {
+        onBookshelfUpdate(bookIdToRemove, isInBookshelf);
+      }
+      
+      console.log('Book removed from bookshelf');
+    } else {
+      console.error('Failed to remove book:', result.message);
+    }
+  } catch (error) {
+    console.error('Error removing from bookshelf:', error);
+  }
+};
 
   const getShelfName = (shelfType) => {
     const names = {
@@ -134,29 +190,53 @@ const BookCard = ({ book = {} }) => {
     return names[shelfType] || shelfType;
   };
 
-  const showToast = (message, type = 'success') => {
-    console.log(`${type}: ${message}`);
-  };
+  // Close bookshelf menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showBookshelfMenu && !e.target.closest('.bookshelf-menu')) {
+        setShowBookshelfMenu(false);
+      }
+    };
 
-  const bookTitle = activeBook.title || 'Untitled';
-  const bookAuthor = activeBook.author || 'Unknown Author';
-  const bookId = activeBook.gutenbergId || activeBook._id;
-  const downloadCount = activeBook.downloadCount || 0;
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showBookshelfMenu]);
+
+  if (!book) {
+    return (
+      <div className="flex flex-col rounded-2xl p-2 w-full max-w-[200px] animate-pulse">
+        <div className="bg-gray-700 rounded-xl aspect-[2/3] mb-2"></div>
+        <div className="h-4 bg-gray-700 rounded mb-1"></div>
+        <div className="h-3 bg-gray-700 rounded mb-2"></div>
+      </div>
+    );
+  }
+
+  const {
+    _id,
+    title = 'Untitled',
+    author = 'Unknown Author',
+    gutenbergId,
+    downloadCount = 0,
+    subjects = [],
+    downloadLinks = []
+  } = book;
+
+  const bookId = gutenbergId || _id;
   const rating = Math.min(5, 3 + (downloadCount / 10000) * 2).toFixed(1);
 
   return (
-    <div className="flex flex-col group relative cursor-pointer hover:border-[#D4E09B]/30 rounded-2xl p-2 transition-all duration-300 border border-transparent w-full max-w-[200px]">
+    <div className="flex flex-col group relative hover:border-[#D4E09B]/30 rounded-2xl p-2 transition-all duration-300 border border-transparent w-full max-w-[200px]">
       
       {/* Cover Image Container */}
       <div className="border-2 border-white/5 relative rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-2 aspect-[2/3]">
         
-        <img 
-          src={imageSrc} 
-          alt={bookTitle} 
-          onError={handleError}
+          <img 
+          src={imageSrc || 'https://via.placeholder.com/300x450?text=No+Cover'} 
+          alt={title} 
+          onError={handleImageError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-
         {/* Status Badge based on download count */}
         {downloadCount > 50000 && (
           <span className="absolute top-2 left-2 bg-[#D4E09B] text-black text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-md">
@@ -167,7 +247,8 @@ const BookCard = ({ book = {} }) => {
         {/* Bookshelf Status Badge */}
         {isInBookshelf && (
           <span className="absolute top-2 right-2 bg-[#9CAFB7] text-black text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-md">
-            {isInBookshelf === 'read' ? 'Read' : isInBookshelf === 'currentlyReading' ? 'Reading' : 'Want'}
+            {isInBookshelf === 'read' ? 'Read' : 
+             isInBookshelf === 'currentlyReading' ? 'Reading' : 'Want'}
           </span>
         )}
 
@@ -177,7 +258,7 @@ const BookCard = ({ book = {} }) => {
             {/* Top Right: Like & Bookshelf Buttons */}
             <div className="flex justify-between">
               {/* Bookshelf Button */}
-              <div className="relative">
+              <div className="relative bookshelf-menu">
                 <button 
                   onClick={(e) => { 
                     e.stopPropagation(); 
@@ -215,14 +296,14 @@ const BookCard = ({ book = {} }) => {
                     ))}
                     {isInBookshelf && (
                       <>
-                        <div className="border-t border-white/5 my-1"></div>
+                        <div className=" cursor-pointer border-t border-white/5 my-1"></div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveFromBookshelf();
                             setShowBookshelfMenu(false);
                           }}
-                          className="w-full text-left px-4 py-2 text-sm text-[#D4A5A5] hover:bg-[#D4A5A5]/10"
+                          className="cursor-pointer w-full text-left px-4 py-2 text-sm text-[#D4A5A5] hover:bg-[#D4A5A5]/10"
                         >
                           Remove
                         </button>
@@ -239,8 +320,8 @@ const BookCard = ({ book = {} }) => {
               >
                 <Heart 
                   size={16} 
-                  fill={isLiked || (profile?.favoriteBooks?.includes(activeBook._id)) ? "currentColor" : "none"} 
-                  className={(isLiked || profile?.favoriteBooks?.includes(activeBook._id)) ? "text-[#D4A5A5]" : ""} 
+                  fill={isLiked ? "currentColor" : "none"} 
+                  className={isLiked ? "text-[#D4A5A5]" : ""} 
                 />
               </button>
             </div>
@@ -267,10 +348,12 @@ const BookCard = ({ book = {} }) => {
 
       {/* Book Metadata */}
       <div className="flex-1">
-        <h3 className="font-bold text-white text-sm line-clamp-2 group-hover:text-[#D4E09B] transition-colors mb-1 min-h-[2.5rem]">
-          {bookTitle}
-        </h3>
-        <p className="text-xs text-gray-400 mb-1 line-clamp-1">{bookAuthor}</p>
+        <Link to={`/book/${bookId}`}>
+          <h3 className="font-bold text-white text-sm line-clamp-2 group-hover:text-[#D4E09B] transition-colors mb-1 min-h-[2.5rem]">
+            {title}
+          </h3>
+        </Link>
+        <p className="text-xs text-gray-400 mb-1 line-clamp-1">{author}</p>
         
         {/* Star Ratings */}
         <StarRating rating={parseFloat(rating)} />
@@ -293,13 +376,13 @@ const BookCard = ({ book = {} }) => {
                 e.stopPropagation();
                 handleAddToBookshelf('wantToRead');
               }}
-              className="flex-1 text-xs bg-[#9CAFB7]/10 text-[#9CAFB7] hover:bg-[#9CAFB7]/20 py-1.5 rounded-lg transition-colors border border-[#9CAFB7]/20"
+              className="cursor-pointer flex-1 text-xs bg-[#9CAFB7]/10 text-[#9CAFB7] hover:bg-[#9CAFB7]/20 py-1.5 rounded-lg transition-colors border border-[#9CAFB7]/20"
             >
               Save
             </button>
           )}
           
-          {activeBook.downloadLinks?.length > 0 && (
+          {downloadLinks?.length > 0 && (
             <Link
               to={`/read/${bookId}`}
               className="flex-1 text-xs bg-[#D4E09B]/10 text-[#D4E09B] hover:bg-[#D4E09B]/20 py-1.5 rounded-lg transition-colors text-center border border-[#D4E09B]/20"
@@ -310,27 +393,18 @@ const BookCard = ({ book = {} }) => {
         </div>
         
         {/* Subjects/Tags */}
-        {activeBook.subjects && activeBook.subjects.length > 0 && (
+        {subjects.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {activeBook.subjects.slice(0, 2).map((subject, index) => (
+            {subjects.slice(0, 2).map((subject, index) => (
               <span key={index} className="text-[10px] bg-[#2a2525] text-gray-400 px-1.5 py-0.5 rounded border border-white/5">
-                {subject.split(' -- ')[0]}
+                {typeof subject === 'string' ? subject.split(' -- ')[0] : 'Tag'}
               </span>
             ))}
           </div>
         )}
       </div>
-
-      {/* Close bookshelf menu when clicking outside */}
-      {showBookshelfMenu && (
-        <div 
-          className="fixed inset-0 z-40"
-          onClick={() => setShowBookshelfMenu(false)}
-        />
-      )}
     </div>
   );
 };
-
 
 export default BookCard;
