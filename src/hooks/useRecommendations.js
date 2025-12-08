@@ -1,9 +1,8 @@
-// src/hooks/useRecommendations.js - FINAL FIXED VERSION
+// src/hooks/useRecommendations.js
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { fetchRecommendations, fetchPopularBooks } from '../api/books';
 import { standardBooks } from '../data';
-import { API_BASE_URL } from '../api/books';
 
 export const useRecommendations = (options = {}) => {
   const { currentUser, loading: authLoading } = useAuth();
@@ -33,14 +32,9 @@ export const useRecommendations = (options = {}) => {
         try {
           console.log('👤 User is logged in, fetching personalized recommendations...');
           
-          // Fetch personalized recommendations (USING YOUR EMBEDDINGS SYSTEM)
-           const response = await fetch(`${API_BASE_URL}/books/similar-recommendations?limit=${limit}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
+          // Use the API function from books.js
+          const response = await fetchRecommendations({ limit });
+          
           console.log('📡 API response structure:', {
             success: response.success,
             dataLength: response.data?.length,
@@ -49,12 +43,8 @@ export const useRecommendations = (options = {}) => {
             message: response.message
           });
           
-          // Check if we have valid recommendations
           if (response.success && response.data && response.data.length > 0) {
             console.log(`✅ Found ${response.data.length} recommendations (source: ${response.source})`);
-            
-            // DEBUG: Log the actual book titles
-            console.log('📚 Books returned:', response.data.map(b => b.title).slice(0, 5));
             
             setRecommendations(response.data);
             setUserGenres(response.userGenres || []);
@@ -66,11 +56,10 @@ export const useRecommendations = (options = {}) => {
           }
         } catch (recError) {
           console.error('❌ Personalized recommendations failed:', recError);
-          // Continue to fallback
         }
       }
       
-      // Fallback 1: Try popular books from API
+      // Fallback to popular books
       if (fallbackToPopular) {
         try {
           console.log('📊 Falling back to popular books from API...');
@@ -89,7 +78,7 @@ export const useRecommendations = (options = {}) => {
         }
       }
       
-      // Fallback 2: Use local sample data
+      // Final fallback to local data
       console.log('🔄 Using local sample data as final fallback');
       setRecommendations(standardBooks.slice(0, limit));
       setUserGenres([]);
@@ -98,8 +87,6 @@ export const useRecommendations = (options = {}) => {
     } catch (error) {
       console.error('❌ Error in recommendation flow:', error);
       setError(error.message);
-      
-      // Ultimate fallback
       setRecommendations(standardBooks.slice(0, Math.min(limit, 10)));
       setUserGenres([]);
       setSource('error_fallback');
@@ -118,7 +105,6 @@ export const useRecommendations = (options = {}) => {
     }
   }, [fetchRecommendationsData, authLoading]);
 
-  // DEBUG: Log when recommendations change
   useEffect(() => {
     if (recommendations.length > 0) {
       console.log('🎯 Recommendations updated:', {
