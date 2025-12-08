@@ -12,7 +12,8 @@ const StarRating = ({ rating = 0 }) => {
       {[...Array(5)].map((_, i) => (
         <Star 
           key={i} 
-          size={12} 
+          size={10} 
+          // className="sm:size-12 md:size-12" // Removed duplicate className
           className={
             i < Math.round(rating) 
               ? "fill-[#D4E09B] text-[#D4E09B]" 
@@ -42,15 +43,13 @@ const BookCard = ({ book = {}, onBookshelfUpdate }) => {
   } = useUserProfile();
 
   // Set initial image source
-
-useEffect(() => {
-  if (book?.coverImageUrl && typeof book.coverImageUrl === 'string' && book.coverImageUrl.trim() !== '') {
-    setImageSrc(book.coverImageUrl);
-  } else {
-    setImageSrc('https://via.placeholder.com/300x450?text=No+Cover');
-  }
-}, [book]);
-
+  useEffect(() => {
+    if (book?.coverImageUrl && typeof book.coverImageUrl === 'string' && book.coverImageUrl.trim() !== '') {
+      setImageSrc(book.coverImageUrl);
+    } else {
+      setImageSrc('https://via.placeholder.com/300x450?text=No+Cover');
+    }
+  }, [book]);
 
   // Check if book is in any bookshelf
   useEffect(() => {
@@ -199,15 +198,19 @@ useEffect(() => {
     };
 
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [showBookshelfMenu]);
 
   if (!book) {
     return (
-      <div className="flex flex-col rounded-2xl p-2 w-full max-w-[200px] animate-pulse">
-        <div className="bg-gray-700 rounded-xl aspect-[2/3] mb-2"></div>
-        <div className="h-4 bg-gray-700 rounded mb-1"></div>
-        <div className="h-3 bg-gray-700 rounded mb-2"></div>
+      <div className="flex flex-col rounded-xl md:rounded-2xl p-1 md:p-2 w-full max-w-[120px] sm:max-w-[140px] md:max-w-[160px] animate-pulse">
+        <div className="bg-gray-700 rounded-lg md:rounded-xl aspect-[2/3] mb-1 md:mb-2"></div>
+        <div className="h-3 md:h-4 bg-gray-700 rounded mb-0.5 md:mb-1"></div>
+        <div className="h-2.5 md:h-3 bg-gray-700 rounded mb-1 md:mb-2"></div>
       </div>
     );
   }
@@ -226,10 +229,10 @@ useEffect(() => {
   const rating = Math.min(5, 3 + (downloadCount / 10000) * 2).toFixed(1);
 
   return (
-    <div className="flex flex-col group relative hover:border-[#D4E09B]/30 rounded-2xl p-2 transition-all duration-300 border border-transparent w-full max-w-[200px]">
+    <div className="flex flex-col group relative hover:border-[#D4E09B]/30 rounded-lg md:rounded-2xl p-1 md:p-2 transition-all duration-300 border border-transparent w-full max-w-[120px] sm:max-w-[140px] md:max-w-[160px] lg:max-w-[180px]">
       
       {/* Cover Image Container */}
-      <div className="border-2 border-white/5 relative rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-2 aspect-[2/3]">
+      <div className="border border-white/5 md:border-2 relative rounded-lg md:rounded-xl overflow-hidden shadow-sm hover:shadow-md md:hover:shadow-lg transition-all duration-300 mb-1 md:mb-2 aspect-[2/3]">
         
           <img 
           src={imageSrc || 'https://via.placeholder.com/300x450?text=No+Cover'} 
@@ -239,21 +242,21 @@ useEffect(() => {
         />
         {/* Status Badge based on download count */}
         {downloadCount > 50000 && (
-          <span className="absolute top-2 left-2 bg-[#D4E09B] text-black text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-md">
+          <span className="absolute top-1 left-1 md:top-2 md:left-2 bg-[#D4E09B] text-black text-[8px] md:text-[10px] font-bold px-1 md:px-2 py-0.5 md:py-1 rounded-full uppercase tracking-wide shadow">
             Popular
           </span>
         )}
 
         {/* Bookshelf Status Badge */}
         {isInBookshelf && (
-          <span className="absolute top-2 right-2 bg-[#9CAFB7] text-black text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-md">
+          <span className="absolute top-1 right-1 md:top-2 md:right-2 bg-[#9CAFB7] text-black text-[8px] md:text-[10px] font-bold px-1 md:px-2 py-0.5 md:py-1 rounded-full uppercase tracking-wide shadow">
             {isInBookshelf === 'read' ? 'Read' : 
              isInBookshelf === 'currentlyReading' ? 'Reading' : 'Want'}
           </span>
         )}
 
-        {/* Hover Overlay Actions */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#191A19]/90 via-[#191A19]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3">
+        {/* Hover Overlay Actions - Only show on non-touch devices */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#191A19]/90 via-[#191A19]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col justify-between p-2 md:p-3">
             
             {/* Top Right: Like & Bookshelf Buttons */}
             <div className="flex justify-between">
@@ -264,19 +267,19 @@ useEffect(() => {
                     e.stopPropagation(); 
                     setShowBookshelfMenu(!showBookshelfMenu);
                   }}
-                  className="bg-[#191A19]/90 p-1.5 rounded-full hover:bg-[#202425] text-white hover:text-[#9CAFB7] transition-colors border border-white/10"
+                  className="bg-[#191A19]/90 p-1 md:p-1.5 rounded-full hover:bg-[#202425] text-white hover:text-[#9CAFB7] transition-colors border border-white/10"
                 >
                   {isInBookshelf ? (
-                    <Bookmark size={16} fill="currentColor" className="text-[#9CAFB7]" />
+                    <Bookmark size={14} md:size={16} fill="currentColor" className="text-[#9CAFB7]" />
                   ) : (
-                    <Plus size={16} />
+                    <Plus size={14} md:size={16} />
                   )}
                 </button>
 
                 {/* Bookshelf Dropdown Menu */}
                 {showBookshelfMenu && (
-                  <div className="absolute left-0 top-full mt-2 w-40 bg-[#202425] border border-white/10 rounded-lg shadow-xl z-50 py-2">
-                    <div className="px-4 py-2 text-xs text-gray-400 font-medium border-b border-white/5">
+                  <div className="absolute left-0 top-full mt-1 md:mt-2 w-32 md:w-40 bg-[#202425] border border-white/10 rounded-lg shadow-xl z-50 py-1 md:py-2">
+                    <div className="px-2 md:px-4 py-1 md:py-2 text-[10px] md:text-xs text-gray-400 font-medium border-b border-white/5">
                       Add to Bookshelf
                     </div>
                     {['currentlyReading', 'wantToRead', 'read'].map((shelf) => (
@@ -286,24 +289,24 @@ useEffect(() => {
                           e.stopPropagation();
                           handleAddToBookshelf(shelf);
                         }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-white/5 flex items-center justify-between gap-3"
+                        className="w-full text-left px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm text-gray-200 hover:bg-white/5 flex items-center justify-between gap-2 md:gap-3"
                       >
-                        <span>{getShelfName(shelf)}</span>
+                        <span className="truncate">{getShelfName(shelf)}</span>
                         {isInBookshelf === shelf && (
-                          <Check size={14} className="text-[#D4E09B]" />
+                          <Check size={12} md:size={14} className="text-[#D4E09B] flex-shrink-0" />
                         )}
                       </button>
                     ))}
                     {isInBookshelf && (
                       <>
-                        <div className=" cursor-pointer border-t border-white/5 my-1"></div>
+                        <div className="cursor-pointer border-t border-white/5 my-0.5 md:my-1"></div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveFromBookshelf();
                             setShowBookshelfMenu(false);
                           }}
-                          className="cursor-pointer w-full text-left px-4 py-2 text-sm text-[#D4A5A5] hover:bg-[#D4A5A5]/10"
+                          className="cursor-pointer w-full text-left px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm text-[#D4A5A5] hover:bg-[#D4A5A5]/10"
                         >
                           Remove
                         </button>
@@ -316,10 +319,11 @@ useEffect(() => {
               {/* Favorite Button */}
               <button 
                 onClick={handleToggleFavorite}
-                className="bg-[#191A19]/90 p-1.5 rounded-full hover:bg-[#202425] text-white hover:text-[#D4A5A5] transition-colors border border-white/10"
+                className="bg-[#191A19]/90 p-1 md:p-1.5 rounded-full hover:bg-[#202425] text-white hover:text-[#D4A5A5] transition-colors border border-white/10"
               >
                 <Heart 
-                  size={16} 
+                  size={14} 
+                  md:size={16}
                   fill={isLiked ? "currentColor" : "none"} 
                   className={isLiked ? "text-[#D4A5A5]" : ""} 
                 />
@@ -327,19 +331,19 @@ useEffect(() => {
             </div>
 
             {/* Bottom: Quick Action Button */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1 md:gap-2">
               <Link
                 to={`/book/${bookId}`}
-                className="w-full bg-[#D4E09B] py-2 rounded-lg text-xs font-bold text-black hover:bg-[#c5d38a] flex items-center justify-center gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg"
+                className="w-full bg-[#D4E09B] py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold text-black hover:bg-[#c5d38a] flex items-center justify-center gap-1 md:gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg"
               >
-                <ShoppingBag size={14} /> View Details
+                <ShoppingBag size={12} md:size={14} /> View Details
               </Link>
               
               {/* Download count */}
               {downloadCount > 0 && (
-                <div className="flex items-center justify-center gap-1 text-white/80 text-xs bg-black/60 rounded px-2 py-1 backdrop-blur-sm">
-                  <Download size={10} />
-                  <span>{downloadCount.toLocaleString()}</span>
+                <div className="flex items-center justify-center gap-1 text-white/80 text-[10px] md:text-xs bg-black/60 rounded px-1.5 md:px-2 py-0.5 md:py-1 backdrop-blur-sm">
+                  <Download size={8} md:size={10} />
+                  <span className="truncate">{downloadCount.toLocaleString()}</span>
                 </div>
               )}
             </div>
@@ -348,25 +352,25 @@ useEffect(() => {
 
       {/* Book Metadata */}
       <div className="flex-1">
-        <Link to={`/book/${bookId}`}>
-          <h3 className="font-bold text-white text-sm line-clamp-2 group-hover:text-[#D4E09B] transition-colors mb-1 min-h-[2.5rem]">
+        <Link to={`/book/${bookId}`} className="block">
+          <h3 className="font-bold text-white text-xs md:text-sm line-clamp-2 group-hover:text-[#D4E09B] transition-colors mb-0.5 md:mb-1 min-h-[2rem] md:min-h-[2.5rem]">
             {title}
           </h3>
         </Link>
-        <p className="text-xs text-gray-400 mb-1 line-clamp-1">{author}</p>
+        <p className="text-[10px] md:text-xs text-gray-400 mb-0.5 md:mb-1 line-clamp-1">{author}</p>
         
         {/* Star Ratings */}
         <StarRating rating={parseFloat(rating)} />
         
-        {/* Quick Action Buttons */}
-        <div className="flex gap-2 mt-2">
+        {/* Quick Action Buttons - Always visible on mobile */}
+        <div className="flex gap-1 md:gap-2 mt-1 md:mt-2">
           {isInBookshelf ? (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleRemoveFromBookshelf();
               }}
-              className="flex-1 text-xs bg-[#D4A5A5]/10 text-[#D4A5A5] hover:bg-[#D4A5A5]/20 py-1.5 rounded-lg transition-colors border border-[#D4A5A5]/20"
+              className="cursor-pointer flex-1 text-[10px] md:text-xs bg-[#D4A5A5]/10 text-[#D4A5A5] hover:bg-[#D4A5A5]/20 py-1 md:py-1.5 rounded-lg transition-colors border border-[#D4A5A5]/20"
             >
               Remove
             </button>
@@ -376,7 +380,7 @@ useEffect(() => {
                 e.stopPropagation();
                 handleAddToBookshelf('wantToRead');
               }}
-              className="cursor-pointer flex-1 text-xs bg-[#9CAFB7]/10 text-[#9CAFB7] hover:bg-[#9CAFB7]/20 py-1.5 rounded-lg transition-colors border border-[#9CAFB7]/20"
+              className="cursor-pointer flex-1 text-[10px] md:text-xs bg-[#9CAFB7]/10 text-[#9CAFB7] hover:bg-[#9CAFB7]/20 py-1 md:py-1.5 rounded-lg transition-colors border border-[#9CAFB7]/20"
             >
               Save
             </button>
@@ -385,18 +389,59 @@ useEffect(() => {
           {downloadLinks?.length > 0 && (
             <Link
               to={`/read/${bookId}`}
-              className="flex-1 text-xs bg-[#D4E09B]/10 text-[#D4E09B] hover:bg-[#D4E09B]/20 py-1.5 rounded-lg transition-colors text-center border border-[#D4E09B]/20"
+              className="flex-1 text-[10px] md:text-xs bg-[#D4E09B]/10 text-[#D4E09B] hover:bg-[#D4E09B]/20 py-1 md:py-1.5 rounded-lg transition-colors text-center border border-[#D4E09B]/20"
             >
               Read
             </Link>
           )}
         </div>
         
+        {/* Touch-friendly bookshelf menu for mobile */}
+        <div className="md:hidden mt-1 flex justify-center">
+          <button 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              setShowBookshelfMenu(!showBookshelfMenu);
+            }}
+            className="text-[10px] text-gray-400 hover:text-[#9CAFB7] px-2 py-0.5"
+          >
+            {isInBookshelf ? 'Change Shelf' : 'Add to Shelf'}
+          </button>
+        </div>
+        
+        {/* Mobile bookshelf menu */}
+        {showBookshelfMenu && (
+          <div className="md:hidden mt-1 bg-[#202425] border border-white/10 rounded-lg py-1">
+            <div className="px-3 py-1 text-[10px] text-gray-400 font-medium border-b border-white/5">
+              Add to Bookshelf
+            </div>
+            {['currentlyReading', 'wantToRead', 'read'].map((shelf) => (
+              <button
+                key={shelf}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToBookshelf(shelf);
+                }}
+                className="w-full text-left px-3 py-1.5 text-xs text-gray-200 hover:bg-white/5 flex items-center justify-between"
+              >
+                <span>{getShelfName(shelf)}</span>
+                {isInBookshelf === shelf && (
+                  <Check size={12} className="text-[#D4E09B]" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+        
         {/* Subjects/Tags */}
         {subjects.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
+          <div className="flex flex-wrap gap-0.5 md:gap-1 mt-1 md:mt-2">
             {subjects.slice(0, 2).map((subject, index) => (
-              <span key={index} className="text-[10px] bg-[#2a2525] text-gray-400 px-1.5 py-0.5 rounded border border-white/5">
+              <span 
+                key={index} 
+                className="text-[8px] md:text-[10px] bg-[#2a2525] text-gray-400 px-1 md:px-1.5 py-0.5 rounded border border-white/5 truncate max-w-[60px] md:max-w-none"
+                title={typeof subject === 'string' ? subject : 'Tag'}
+              >
                 {typeof subject === 'string' ? subject.split(' -- ')[0] : 'Tag'}
               </span>
             ))}

@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, ChevronRight, Home, LogOut, User, Library as LibraryIcon, ChevronDown } from 'lucide-react';
+import { Search, ChevronRight, Home, LogOut, User, Library as LibraryIcon, ChevronDown, Menu, X } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { useAuth } from '../hooks/useAuth';
 import { useUserProfile } from '../hooks/useUserProfile';
+import SplitText from './SplitText'; // Import SplitText
 
 
 const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [breadcrumbStack, setBreadcrumbStack] = useState([{ name: 'Home', path: '/' }]);
   
   const { currentUser, logout } = useAuth();
@@ -17,6 +19,18 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const menuRef = useRef(null);
+  // Effect to handle body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    // Cleanup function
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [isMenuOpen]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -118,6 +132,10 @@ const Navbar = () => {
       console.error("Logout failed", error);
     }
   };
+    const handleMobileLinkClick = (path) => {
+    navigate(path);
+    setIsMenuOpen(false);
+  };
 
   const avatarUrl = profile?.personalDetails?.profilePicture ||
     currentUser?.photoURL ||
@@ -125,6 +143,30 @@ const Navbar = () => {
 
   return (
     <>
+    {/* MOBILE MENU */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 bg-chill-surface z-[100] flex flex-col items-center justify-center gap-6 transition-opacity duration-300 animate-in fade-in">
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            className="absolute top-6 right-6 text-white"
+            aria-label="Close menu"
+          >
+            <X size={32} />
+          </button>
+          <button onClick={() => handleMobileLinkClick('/')} className="text-3xl font-bold text-white hover:text-chill-sage transition-colors">
+            <SplitText text="Home" />
+          </button>
+          <button onClick={() => handleMobileLinkClick('/books')} className="text-3xl font-bold text-white hover:text-chill-sage transition-colors">
+            <SplitText text="Books" />
+          </button>
+          <button onClick={() => handleMobileLinkClick('/reader')} className="text-3xl font-bold text-white hover:text-chill-sage transition-colors">
+            <SplitText text="Reader" />
+          </button>
+          <button onClick={() => handleMobileLinkClick('/about')} className="text-3xl font-bold text-white hover:text-chill-sage transition-colors">
+            <SplitText text="About Us" />
+          </button>
+        </div>
+      )}
       {/* --- NAVBAR --- */}
       <nav className="relative py-3 px-8 md:px-16 text-stone-800 bg-chill-surface sticky top-0 z-50 overflow-visible">
         
@@ -133,7 +175,7 @@ const Navbar = () => {
           {/* LOGO */}
           <button onClick={handleHomeClick} className="text-2xl font-black tracking-tighter flex items-center gap-2 hover:opacity-80 transition">
             <div className="h-12">
-              <img src="./booklogo.png" alt="" className='w-full h-full'/>
+              <img src="/booklogo.png" alt="Tome Logo" className='w-full h-full'/>
             </div>
             <span className='text-white'>TOME</span>
           </button>
@@ -142,7 +184,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6 text-sm font-semibold tracking-tighter uppercase text-stone-500 absolute left-1/2 transform -translate-x-1/2 h-full">
             
             {/* HOME (Standard Link) */}
-            <button onClick={() => navigate('/')} className="hover:text-chill-sage transition cursor-pointer">
+            <button onClick={() => navigate('/')} className="hover:text-chill-sage transition cursor-pointer text-white">
               Home
             </button>
 
@@ -150,7 +192,7 @@ const Navbar = () => {
             <div className="relative group h-full flex items-center">
               <button
                 onClick={() => navigate('/books')}
-                className="flex items-center gap-1 hover:text-chill-sage transition cursor-pointer py-4"
+                className="flex items-center gap-1 hover:text-chill-sage transition cursor-pointer py-4 text-white"
               >
                 Books
                 <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
@@ -183,17 +225,20 @@ const Navbar = () => {
               </div>
             </div>
 
-            <button onClick={() => navigate('/reader')} className="hover:text-chill-sage transition cursor-pointer">Reader</button>
-            <button onClick={() => navigate('/')} className="hover:text-chill-sage transition cursor-pointer">About Us</button>
+            <button onClick={() => navigate('/reader')} className="hover:text-chill-sage transition cursor-pointer text-white">Reader</button>
+            <button onClick={() => navigate('/')} className="hover:text-chill-sage transition cursor-pointer text-white">About Us</button>
           </div>
 
-          {/* SEARCH + LOGIN/PROFILE */}
-          <div className="flex items-center space-x-4 md:space-x-6 text-xs font-medium">
-            
-          
-
-           
-
+          {/* RIGHT-SIDE CONTROLS */}
+          <div className="flex items-center space-x-4">
+             {/* Hamburger Menu Button */}
+             <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden text-white"
+              aria-label="Open menu"
+            >
+              <Menu size={28} />
+            </button>
             {currentUser ? (
               <div className="relative ml-2" ref={menuRef}>
                 <button
@@ -245,8 +290,8 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-4">
-                <button onClick={() => navigate('/login')} className="text-stone-600 hover:text-stone-900 transition whitespace-nowrap">Log In</button>
+              <div className="hidden md:flex items-center gap-4">
+                <button onClick={() => navigate('/login')} className="text-white hover:text-stone-900 transition whitespace-nowrap">Log In</button>
                 <button onClick={() => navigate('/signup')} className="bg-stone-900 text-stone-50 px-5 py-2.5 rounded-full hover:bg-stone-700 transition shadow-md whitespace-nowrap">
                   Sign Up
                 </button>
