@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { standardBooks } from '../data';
+import { API_BASE_URL } from '../api/books'; // Import the API base URL
 
 // API function to add to your books.js
 const fetchBecauseYouLiked = async (options = {}) => {
@@ -16,7 +17,9 @@ const fetchBecauseYouLiked = async (options = {}) => {
   };
   
   const queryString = new URLSearchParams({ limit }).toString();
-  const response = await fetch(`/api/books/because-you-liked${queryString ? `?${queryString}` : ''}`, {
+  
+  // ✅ FIXED: Use the full API_BASE_URL
+  const response = await fetch(`${API_BASE_URL}/books/because-you-liked${queryString ? `?${queryString}` : ''}`, {
     headers
   });
   
@@ -48,6 +51,7 @@ export const useBecauseYouLiked = (options = {}) => {
       setIsLoading(true);
       setError(null);
       console.log('🔄 Fetching "Because You Liked" recommendations...');
+      console.log('🌐 API Base URL:', API_BASE_URL); // Add this for debugging
       
       if (currentUser) {
         try {
