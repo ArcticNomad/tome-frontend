@@ -6,6 +6,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useUserProfile } from '../../hooks/useUserProfile';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://tome-backend-production-5402.up.railway.app/api');
+
 
 const LibraryBookCard = ({ book, shelf, onBookRemoved }) => {
   const [showRemoveMenu, setShowRemoveMenu] = useState(false);
@@ -93,7 +96,7 @@ const handleRemoveFromBookshelf = async (e) => {
     if (shelf === 'wantToRead') backendShelf = 'want-to-read';
 
     // FIX: Use backendShelf instead of shelfEndpoint
-    const response = await fetch(`http://localhost:5000/api/users/bookshelves/${backendShelf}/${bookId}`, {
+   const response = await fetch(`${API_BASE_URL}/users/bookshelves/${backendShelf}/${bookId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,

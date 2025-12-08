@@ -4,6 +4,9 @@ import { useUserProfile } from '../../hooks/useUserProfile';
 import { BookOpen, Zap, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SplitText from "../SplitText"; // ← Your GSAP text animation component
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://tome-backend-production-5402.up.railway.app/api');
+
 
 const UserInfo = () => {
   const { currentUser } = useAuth();
@@ -24,7 +27,7 @@ const UserInfo = () => {
         setLoading(true);
         const [statsData, historyResponse] = await Promise.all([
           getUserStats(),
-          fetch('http://localhost:5000/api/users/reading-history', {
+          fetch(`${API_BASE_URL}/users/reading-history`, {
             headers: { 'Authorization': `Bearer ${await currentUser.getIdToken()}` }
           })
         ]);
