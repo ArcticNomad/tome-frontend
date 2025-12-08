@@ -25,22 +25,33 @@ async function apiRequest(endpoint, options = {}) {
   console.log(`[API] Endpoint: ${endpoint}`);
   
   const token = await getAuthToken();
+  const user = auth.currentUser;
   
-  console.log(`[API] Token obtained:`, token ? `Yes (${token.substring(0, 20)}...)` : 'No token');
+  console.log(`[API] Token obtained:`, token ? `Yes` : 'No token');
+  console.log(`[API] User UID obtained:`, user ? user.uid : 'No user');
   console.log(`[API] Current endpoint requires auth:`, endpoint.includes('similar-recommendations') || endpoint.includes('because-you-liked'));
   
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  if (user) {
+    headers['firebase-uid'] = user.uid;
+  }
+
   const config = {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-      ...options.headers,
-    },
+    headers,
     ...options,
   };
 
   console.log(`[API] ${config.method} ${url}`);
-  console.log(`[API] Headers sent:`, config.headers);
+
   
   try {
     const response = await fetch(url, config);
