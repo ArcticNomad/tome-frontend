@@ -113,7 +113,7 @@ const Navbar = () => {
     try {
       setProfileMenuOpen(false);
       await logout();
-      window.location.reload();
+      navigate('/');
     } catch (error) {
       console.error("Logout failed", error);
     }
