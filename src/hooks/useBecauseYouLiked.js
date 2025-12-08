@@ -2,33 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { standardBooks } from '../data';
-import { API_BASE_URL } from '../api/books'; // Import the API base URL
-
-// API function to add to your books.js
-const fetchBecauseYouLiked = async (options = {}) => {
-  const { limit = 10 } = options;
-  
-  const { auth } = await import('../firebase/config');
-  const currentUser = auth.currentUser;
-  
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(currentUser?.uid && { 'firebaseuid': currentUser.uid }),
-  };
-  
-  const queryString = new URLSearchParams({ limit }).toString();
-  
-  // ✅ FIXED: Use the full API_BASE_URL
-  const response = await fetch(`${API_BASE_URL}/books/because-you-liked${queryString ? `?${queryString}` : ''}`, {
-    headers
-  });
-  
-  if (!response.ok) {
-    throw new Error(`HTTP error! Status: ${response.status}`);
-  }
-  
-  return response.json();
-};
+import { fetchBecauseYouLiked } from '../api/books';
 
 export const useBecauseYouLiked = (options = {}) => {
   const { currentUser, loading: authLoading } = useAuth();
@@ -51,46 +25,82 @@ export const useBecauseYouLiked = (options = {}) => {
       setIsLoading(true);
       setError(null);
       console.log('🔄 Fetching "Because You Liked" recommendations...');
-      console.log('🌐 API Base URL:', API_BASE_URL); // Add this for debugging
+      console.log('👤 Current user:', currentUser?.uid);
       
-      if (currentUser) {
-        try {
-          const response = await fetchBecauseYouLiked({ limit });
-          
-          if (response.success && response.data && response.data.length > 0) {
-            console.log(`✅ Found ${response.data.length} "Because You Liked" recommendations`);
-            console.log(`📚 Source: ${response.message}`);
-            
-            setRecommendations(response.data);
-            setSource(response.source);
-            setSourceBook(response.sourceBook || null);
-            setMessage(response.message || '');
-            setIsLoading(false);
-            return;
-          }
-        } catch (apiError) {
-          console.error('❌ Because You Liked API error:', apiError);
-        }
+      // Check if user is logged in
+      if (!currentUser) {
+        console.log('👤 No user logged in, using sample data');
+        setRecommendations(standardBooks.slice(0, limit));
+        setSource('no_user');
+        setMessage('Sign in to get personalized recommendations');
+        setIsLoading(false);
+        return;
       }
       
-      // Fallback for non-logged-in users or API failure
-      console.log('🔄 Using sample data as fallback');
-      setRecommendations(standardBooks.slice(0, limit));
-      setSource('sample_fallback');
-      setSourceBook(null);
-      setMessage('Popular books you might like');
+      try {
+        console.log('📡 Calling because-you-liked API...');
+        const response = await fetchBecauseYouLiked({ limit });
+        
+        console.log('📡 Because You Liked API Response:', {
+          success: response.success,
+          dataLength: response.data?.length,
+          source: response.source,
+          message: response.message,
+          sourceBook: response.sourceBook,
+          userRegistered: response.userRegistered
+        });
+        
+        if (response.success && response.data && response.data.length > 0) {
+          console.log(`✅ Found ${response.data.length} "Because You Liked" recommendations`);
+          console.log(`📚 Source: ${response.source}, Message: ${response.message}`);
+          
+          setRecommendations(response.data);
+          setSource(response.source || 'unknown');
+          setSourceBook(response.sourceBook || null);
+          setMessage(response.message || '');
+          setIsLoading(false);
+          return;
+        } else if (response.success && (!response.data || response.data.length === 0)) {
+          // API succeeded but returned empty data
+          console.log('⚠️ API returned empty data');
+          setRecommendations(standardBooks.slice(0, limit));
+          setSource(response.source || 'empty_response');
+          setMessage(response.message || 'Rate more books to get personalized recommendations');
+          setIsLoading(false);
+          return;
+        } else {
+          // API returned failure
+          console.log('⚠️ API returned failure:', response.message);
+          throw new Error(response.message || 'API request failed');
+        }
+      } catch (apiError) {
+        console.error('❌ Because You Liked API error:', apiError.message);
+        console.error('Error stack:', apiError.stack);
+        
+        // Fallback to sample data on API error
+        setRecommendations(standardBooks.slice(0, limit));
+        setSource('api_error_fallback');
+        setMessage('Popular books you might like');
+        setIsLoading(false);
+        return;
+      }
       
     } catch (error) {
       console.error('❌ Error in Because You Liked flow:', error);
       setError(error.message);
       setRecommendations(standardBooks.slice(0, Math.min(limit, 10)));
       setSource('error_fallback');
+      setMessage('Something went wrong');
     } finally {
-      setIsLoading(false);
+      // Ensure loading is set to false
+      if (isLoading) {
+        setIsLoading(false);
+      }
     }
-  }, [currentUser, limit, autoFetch]);
+  }, [currentUser, limit, autoFetch, isLoading]);
 
   const refresh = useCallback(() => {
+    console.log('🔄 Refreshing Because You Liked recommendations...');
     fetchBecauseYouLikedData();
   }, [fetchBecauseYouLikedData]);
 
@@ -99,6 +109,19 @@ export const useBecauseYouLiked = (options = {}) => {
       fetchBecauseYouLikedData();
     }
   }, [fetchBecauseYouLikedData, authLoading]);
+
+  // Log when recommendations update
+  useEffect(() => {
+    if (recommendations.length > 0) {
+      console.log('🎯 Recommendations updated:', {
+        count: recommendations.length,
+        source,
+        hasSourceBook: !!sourceBook,
+        message,
+        books: recommendations.slice(0, 3).map(b => b.title)
+      });
+    }
+  }, [recommendations, source, sourceBook, message]);
 
   return {
     recommendations,
@@ -109,6 +132,7 @@ export const useBecauseYouLiked = (options = {}) => {
     message,
     hasRecommendations: recommendations.length > 0,
     refresh,
-    isEmpty: !isLoading && recommendations.length === 0
+    isEmpty: !isLoading && recommendations.length === 0,
+    hasUser: !!currentUser
   };
 };

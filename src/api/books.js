@@ -328,9 +328,29 @@ export async function fetchHomepageStats() {
   return apiRequest('/books/stats/homepage');
 }
 
+// src/api/books.js - Update the fetchBecauseYouLiked function
 export async function fetchBecauseYouLiked(options = {}) {
-  const queryString = new URLSearchParams(options).toString();
-  return apiRequest(`/books/because-you-liked${queryString ? `?${queryString}` : ''}`);
+  console.log('📞 fetchBecauseYouLiked called with options:', options);
+  
+  try {
+    const limit = options.limit || 10;
+    const endpoint = `/books/because-you-liked?limit=${limit}`;
+    
+    console.log('🌐 Calling because-you-liked endpoint:', endpoint);
+    
+    // Use apiRequest which handles auth headers
+    return await apiRequest(endpoint);
+  } catch (error) {
+    console.error('❌ Error in fetchBecauseYouLiked:', error);
+    
+    // Return a fallback response
+    return {
+      success: false,
+      message: error.message,
+      data: [],
+      source: 'api_error'
+    };
+  }
 }
 
 // Recommendations functions
