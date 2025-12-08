@@ -82,8 +82,8 @@ const CategoryHighlight = ({
   const imageUrl = getBackgroundImage();
 
   return (
-    <section className="space-y-6">
-      <div className="relative rounded-2xl overflow-hidden border border-white/5 group hover:border-white/20 transition-all duration-300">
+    <section className="space-y-4 md:space-y-6">
+      <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/5 group hover:border-white/20 transition-all duration-300">
         {/* Background Image */}
         {imageUrl && (
           <div className="absolute inset-0 z-0">
@@ -92,54 +92,54 @@ const CategoryHighlight = ({
               alt={title}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
+            {/* Gradient Overlay - Responsive direction */}
+            <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
             {/* Pattern Overlay */}
             <div className="absolute inset-0 bg-noise opacity-5" />
             {/* Subtle vignette */}
-            <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]" />
+            <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] md:shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]" />
           </div>
         )}
         
         {/* Content */}
-        <div className="relative z-10 p-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 ${iconBgColor} rounded-xl flex items-center justify-center backdrop-blur-lg bg-white/30 shadow-2xl group-hover:scale-110 transition-transform duration-300`}>
-                <span className={`${iconTextColor} text-lg font-bold`}>{iconLetter}</span>
+        <div className="relative z-10 p-4 md:p-6 lg:p-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-6 gap-4">
+            <div className="flex items-start md:items-center gap-3">
+              <div className={`w-8 h-8 md:w-10 md:h-10 ${iconBgColor} rounded-lg md:rounded-xl flex items-center justify-center backdrop-blur-lg bg-white/30 shadow-xl md:shadow-2xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
+                <span className={`${iconTextColor} text-base md:text-lg font-bold`}>{iconLetter}</span>
               </div>
-              <div>
-                <h2 className="text-4xl font-bold text-white drop-shadow-lg">
+              <div className="flex-1">
+                <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-lg">
                   {title}
                 </h2>
-                <div className="h-1 w-16 bg-gradient-to-r from-white/70 to-transparent mt-2 rounded-full" />
+                <div className="h-1 w-10 md:w-16 bg-gradient-to-r from-white/70 to-transparent mt-1 md:mt-2 rounded-full" />
               </div>
             </div>
             {linkTo && (
               <Link 
                 to={linkTo} 
-                className="group/view-all text-sm font-medium text-white hover:text-chill-rose flex items-center gap-2 transition-all backdrop-blur-lg bg-black/40 px-5 py-3 rounded-full border border-white/20 hover:border-chill-rose/40 hover:bg-black/60"
+                className="group/view-all text-xs md:text-sm font-medium text-white hover:text-chill-rose flex items-center justify-center gap-1.5 md:gap-2 transition-all backdrop-blur-lg bg-black/40 px-3 py-2 md:px-5 md:py-3 rounded-full border border-white/20 hover:border-chill-rose/40 hover:bg-black/60 self-start md:self-auto w-full md:w-auto text-center"
               >
                 <span>Explore All</span>
-                <ChevronRight size={18} className="group-hover/view-all:translate-x-1 transition-transform" />
+                <ChevronRight size={14} md:size={18} className="group-hover/view-all:translate-x-1 transition-transform" />
               </Link>
             )}
           </div>
           
-          <div className="mt-6 max-w-2xl">
-            <p className="text-gray-200 text-base leading-relaxed backdrop-blur-sm bg-black/30 inline-block px-6 py-4 rounded-xl border border-white/10 group-hover:bg-black/40 transition-all duration-300">
+          <div className="mt-4 md:mt-6 max-w-2xl">
+            <p className="text-gray-200 text-sm md:text-base leading-relaxed backdrop-blur-sm bg-black/30 inline-block px-4 py-3 md:px-6 md:py-4 rounded-lg md:rounded-xl border border-white/10 group-hover:bg-black/40 transition-all duration-300">
               {description}
             </p>
             
             {/* Stats Badge */}
-            <div className="flex items-center gap-4 mt-6">
-              <div className="flex items-center gap-3 px-4 py-2 rounded-full backdrop-blur-sm bg-white/10 border border-white/20">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                <span className="text-sm text-white/90 font-medium">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 mt-4 md:mt-6">
+              <div className="flex items-center gap-2 md:gap-3 px-3 py-1.5 md:px-4 md:py-2 rounded-full backdrop-blur-sm bg-white/10 border border-white/20 w-fit">
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-emerald-400 rounded-full animate-pulse" />
+                <span className="text-xs md:text-sm text-white/90 font-medium whitespace-nowrap">
                   {books?.length || 0} Books Available
                 </span>
               </div>
-              <div className="text-sm text-white/60 italic">
+              <div className="text-xs md:text-sm text-white/60 italic">
                 Curated collection • Updated weekly
               </div>
             </div>

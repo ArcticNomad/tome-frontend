@@ -4,20 +4,36 @@ import {
   Search, BookMarked, TrendingUp, Users, Loader2 
 } from 'lucide-react';
 
+// Custom Color Variables
+const COLOR = {
+  BG: '#191A19',
+  SURFACE: '#2C2C2C',
+  BORDER: '#424242',
+  ACCENT: '#D4E09B',
+  PRIMARY_TEXT: '#FFFFFF',
+  SECONDARY_TEXT: '#9CAFB7',
+  BLOB_LIGHT: '#C8B8DB',
+};
+
+/**
+ * Main Full-Screen Loading Spinner with dynamic phases and facts
+ */
 const LoadingSpinner = ({ 
   fullScreen = true, 
-  showStatus = true 
+  showStatus = true,
+  duration = 5000 // Default duration in milliseconds
 }) => {
   const [currentPhase, setCurrentPhase] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [currentFact, setCurrentFact] = useState(0);
-  
+  const [currentFactIndex, setCurrentFactIndex] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
+
   const phases = [
-    { text: 'Connecting to archive', icon: Sparkles },
-    { text: 'Scanning library index', icon: BookOpen },
-    { text: 'Analyzing preferences', icon: Brain },
-    { text: 'Curating selection', icon: Target },
-    { text: 'Polishing interface', icon: Star },
+    { icon: Sparkles, text: 'Connecting to archive securely', duration: 1000 },
+    { icon: BookOpen, text: 'Indexing library structure', duration: 1200 },
+    { icon: Brain, text: 'Analyzing reading patterns', duration: 1100 },
+    { icon: Target, text: 'Curating recommendations', duration: 900 },
+    { icon: Star, text: 'Finalizing experience', duration: 800 },
   ];
 
   const funFacts = [
@@ -25,126 +41,250 @@ const LoadingSpinner = ({
     "The longest novel ever written has over 2 million words.",
     "Reading for 6 minutes can reduce stress by 68%.",
     "The world's smallest book measures 0.07 mm × 0.10 mm.",
-    "The smell of old books is caused by the breakdown of cellulose.",
+    "The smell of old books is caused by cellulose breakdown.",
+    "The first book ever printed was the Gutenberg Bible.",
+    "Most people read at about 200-250 words per minute.",
+    "The term 'bookworm' dates back to the 16th century.",
   ];
 
   useEffect(() => {
-    // Randomize fact on mount so it's fresh if component remounts
-    setCurrentFact(Math.floor(Math.random() * funFacts.length));
+    let progressAnimationId;
+    let phaseTimeoutId;
+    let factTimeoutId;
+    let startTime;
+    
+    const animateProgress = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      
+      const elapsed = timestamp - startTime;
+      const percentComplete = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smoother progress
+      const easeOutQuart = 1 - Math.pow(1 - percentComplete, 4);
+      const currentProgress = easeOutQuart * 100;
+      
+      setProgress(currentProgress);
+      
+      if (percentComplete < 1) {
+        progressAnimationId = requestAnimationFrame(animateProgress);
+      } else {
+        setIsComplete(true);
+        // Set final progress to exactly 100%
+        setProgress(100);
+      }
+    };
 
-    // Progress simulation - Continuous Loop
-    const timer = setInterval(() => {
-      setProgress(old => {
-        // Reset to 0 when complete to show continuous activity (Indeterminate state)
-        if (old >= 100) return 0;
-        // Linear increment for smooth, consistent motion
-        return old + 0.8;
-      });
-    }, 20);
+    // Start progress animation
+    progressAnimationId = requestAnimationFrame(animateProgress);
 
     // Phase cycling
-    const phaseTimer = setInterval(() => {
-      setCurrentPhase(prev => (prev + 1) % phases.length);
-    }, 1200);
-
-    // Fact cycling
-    const factTimer = setInterval(() => {
-      setCurrentFact(prev => (prev + 1) % funFacts.length);
-    }, 3000);
-
-    return () => {
-      clearInterval(timer);
-      clearInterval(phaseTimer);
-      clearInterval(factTimer);
+    let currentPhaseIndex = 0;
+    const cyclePhases = () => {
+      if (currentPhaseIndex < phases.length - 1) {
+        currentPhaseIndex++;
+        setCurrentPhase(currentPhaseIndex);
+        phaseTimeoutId = setTimeout(cyclePhases, phases[currentPhaseIndex].duration);
+      }
     };
-  }, []);
+    
+    phaseTimeoutId = setTimeout(cyclePhases, phases[0].duration);
 
-  const CurrentIcon = phases[currentPhase].icon;
+    // Fun facts cycling
+    const cycleFacts = () => {
+      setCurrentFactIndex(prev => (prev + 1) % funFacts.length);
+      factTimeoutId = setTimeout(cycleFacts, 3000);
+    };
+    
+    factTimeoutId = setTimeout(cycleFacts, 1500);
+
+    // Cleanup
+    return () => {
+      if (progressAnimationId) cancelAnimationFrame(progressAnimationId);
+      if (phaseTimeoutId) clearTimeout(phaseTimeoutId);
+      if (factTimeoutId) clearTimeout(factTimeoutId);
+    };
+  }, [duration]);
+
+  const CurrentPhaseIcon = phases[currentPhase].icon;
+  const currentFact = funFacts[currentFactIndex];
 
   const containerClasses = fullScreen 
-    ? "fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#212121] text-[#EAD2AC]"
-    : "flex flex-col items-center justify-center p-12 bg-[#212121] text-[#EAD2AC] rounded-2xl border border-[#424242]";
+    ? "fixed inset-0 z-50 flex flex-col items-center justify-center bg-chill-bg text-white overflow-hidden"
+    : "flex flex-col items-center justify-center p-12 bg-chill-card rounded-2xl border border-white/10";
 
   return (
     <div className={containerClasses}>
-      <div className="w-full max-w-md flex flex-col items-center relative z-10">
+      {/* Background Orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-chill-sage/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-chill-lavender/5 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center px-4 sm:px-8">
         
-        {/* Main Icon Animation */}
-        <div className="relative mb-12">
-          {/* Subtle glow behind - using Sage */}
-          <div className="absolute inset-0 bg-[#D4E09B]/10 blur-3xl rounded-full" />
-          
-          <div className="relative h-16 w-16 flex items-center justify-center">
-            {/* Spinning outer ring - using Highlight */}
-            <div className="absolute inset-0 border-2 border-[#424242] rounded-full" />
+        {/* Logo/Brand */}
+        <div className="mb-8 sm:mb-12 flex items-center gap-3">
+          <div className="h-8 w-8 sm:h-10 sm:w-10">
+            <img src="/booklogo.png" alt="Tome Logo" className="w-full h-full" />
+          </div>
+          <span className="text-xl sm:text-2xl font-black text-white">TOME</span>
+        </div>
+        
+        {/* Main Spinner */}
+        <div className="relative mb-8 sm:mb-12">
+          {/* Outer Glow Ring */}
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 border-2 border-white/10 rounded-full" />
             <div 
-              className="absolute inset-0 border-t-2 border-[#D4E09B] rounded-full animate-spin"
-              style={{ animationDuration: '2s' }} 
+              className="absolute inset-0 border-t-2 border-chill-sage rounded-full transition-all duration-300"
+              style={{ 
+                clipPath: `inset(0 ${100 - progress}% 0 0)`,
+                transform: 'rotate(0deg)'
+              }}
             />
+          </div>
+          
+          {/* Central Icon Container */}
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+            {/* Pulsing Background */}
+            <div className="absolute inset-0 bg-chill-sage/10 rounded-full animate-pulse" />
             
-            {/* Inner Icon with transition */}
-            <div className="transition-all duration-500 transform scale-100 opacity-100">
-              <CurrentIcon size={24} className="text-[#D4E09B]" />
+            {/* Phase Icon */}
+            <div className="relative">
+              <CurrentPhaseIcon className="w-8 h-8 sm:w-10 sm:h-10 text-chill-sage" />
+              
+              {/* Success Checkmark Animation */}
+              {isComplete && (
+                <div className="absolute inset-0 flex items-center justify-center animate-in zoom-in duration-500">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-chill-sage flex items-center justify-center">
+                    <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Text Content */}
-        <div className="text-center space-y-6 w-full px-8">
+        <div className="text-center w-full space-y-4 sm:space-y-6">
           
-          {/* Phase Text */}
-          <div className="space-y-2">
-            <h2 className="text-xl font-medium tracking-tight text-[#EAD2AC]">
-              {phases[currentPhase].text}
-            </h2>
-            <div className="h-1 w-full bg-[#303030] rounded-full overflow-hidden">
+          {/* Status Text */}
+          {showStatus && (
+            <div className="h-16 sm:h-20 flex flex-col items-center justify-center">
+              <div className="h-8 sm:h-10 overflow-hidden">
+                <div 
+                  className={`text-sm sm:text-base font-medium text-chill-sage transition-transform duration-500 ${
+                    isComplete ? 'opacity-0 scale-95' : 'opacity-100'
+                  }`}
+                >
+                  {phases[currentPhase].text}
+                </div>
+              </div>
+              
+              {/* Fun Facts */}
+              <div className="h-8 sm:h-10 overflow-hidden">
+                <div 
+                  key={currentFactIndex}
+                  className="text-xs sm:text-sm text-gray-400 italic animate-in slide-in-from-bottom-1 fade-in duration-500"
+                >
+                  <Sparkles className="inline-block w-3 h-3 mr-2 text-chill-sage/60" />
+                  {currentFact}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Progress Bar */}
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex justify-between text-xs sm:text-sm">
+              <span className="text-gray-400 font-medium">Loading your library</span>
+              <span className="text-chill-sage font-bold font-mono">
+                {progress.toFixed(0)}%
+              </span>
+            </div>
+            
+            <div className="h-1.5 sm:h-2 w-full bg-white/10 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-[#D4E09B] transition-all duration-200 ease-linear"
+                className="h-full bg-gradient-to-r from-chill-sage via-chill-sage to-chill-lavender rounded-full transition-all duration-300 ease-out shadow-lg shadow-chill-sage/20"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <div className="flex justify-between text-xs font-mono text-[#9CAFB7] pt-1">
-              {/* Show indeterminate status instead of numbers that reset */}
-              <span>Working...</span>
-              <span>{Math.round(progress)}%</span>
+            
+            {/* Progress Dots */}
+            <div className="flex justify-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <div 
+                  key={i}
+                  className={`w-1 h-1 rounded-full transition-all duration-300 ${
+                    progress >= (i + 1) * 20 
+                      ? 'bg-chill-sage' 
+                      : 'bg-white/20'
+                  }`}
+                />
+              ))}
             </div>
           </div>
 
-          {/* Fun Fact Area - Minimalist fade */}
-          {showStatus && (
-            <div className="h-16 flex items-center justify-center">
-              <p className="text-sm text-[#9CAFB7] animate-fade-in transition-opacity duration-500 max-w-xs leading-relaxed">
-                "{funFacts[currentFact]}"
+          {/* Completion Message */}
+          {isComplete && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="text-lg sm:text-xl font-bold text-white mb-2">
+                Ready to explore!
+              </div>
+              <p className="text-sm sm:text-base text-gray-400">
+                Your personalized reading experience is now ready
               </p>
             </div>
           )}
         </div>
       </div>
-      
-      {/* Background decoration */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Sage blob */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#D4E09B]/5 rounded-full blur-3xl" />
-        {/* Lavender blob for contrast */}
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#C8B8DB]/5 rounded-full blur-3xl" />
-      </div>
+
+      {/* Subtle Floating Elements */}
+      {!isComplete && (
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-chill-sage/30 rounded-full animate-float"
+              style={{
+                left: `${15 + i * 25}%`,
+                top: `${20 + i * 15}%`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${3 + i}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-// --- Mini Loader (for small sections) ---
-export const MiniLoader = ({ message = 'Loading...' }) => (
-  <div className="flex flex-col items-center justify-center p-8 gap-4 text-[#9CAFB7]">
-    <Loader2 className="w-6 h-6 animate-spin text-[#D4E09B]" />
-    <span className="text-xs font-medium uppercase tracking-widest">{message}</span>
+/**
+ * Mini Loader for small section loading
+ */
+export const MiniLoader = ({ message = 'Loading content...' }) => (
+  <div className="flex flex-col items-center justify-center p-6 gap-3">
+    <div className="relative">
+      <div className="w-6 h-6 border-2 border-chill-sage/30 rounded-full" />
+      <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-chill-sage rounded-full animate-spin" />
+    </div>
+    <span className="text-xs text-gray-400 font-medium tracking-wider uppercase">
+      {message}
+    </span>
   </div>
 );
 
-// --- Phase Loader (for specific blocking actions) ---
+/**
+ * Phase Loader for specific blocking actions
+ */
 export const PhaseLoader = ({ phase, progress }) => {
   const configs = {
     searching: { icon: Search, label: 'Searching' },
     recommending: { icon: Brain, label: 'Thinking' },
+    loading: { icon: BookOpen, label: 'Loading' },
     default: { icon: Loader2, label: 'Processing' }
   };
 
@@ -152,22 +292,20 @@ export const PhaseLoader = ({ phase, progress }) => {
   const Icon = config.icon;
 
   return (
-    <div className="flex items-center gap-4 p-4 bg-[#303030]/80 border border-[#424242] rounded-xl backdrop-blur-sm">
+    <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg">
       <div className="relative flex-shrink-0">
-        <Icon className="w-5 h-5 text-[#D4E09B] animate-pulse" />
-        {phase === 'recommending' && (
-          <div className="absolute inset-0 bg-[#D4E09B]/20 blur-md rounded-full animate-pulse" />
-        )}
+        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-chill-sage animate-pulse" />
+        <div className="absolute inset-0 bg-chill-sage/20 blur rounded-full" />
       </div>
       
-      <div className="flex-1 min-w-[200px]">
-        <div className="flex justify-between mb-2">
-          <span className="text-sm font-medium text-[#EAD2AC]">{config.label}</span>
-          <span className="text-xs text-[#9CAFB7] font-mono">{progress}%</span>
+      <div className="flex-1 min-w-[120px] sm:min-w-[160px]">
+        <div className="flex justify-between mb-1">
+          <span className="text-xs sm:text-sm font-medium text-white">{config.label}</span>
+          <span className="text-xs text-gray-400 font-mono">{progress.toFixed(0)}%</span>
         </div>
-        <div className="h-1 bg-[#212121] rounded-full overflow-hidden">
+        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-[#D4E09B] transition-all duration-300 ease-out"
+            className="h-full bg-gradient-to-r from-chill-sage to-chill-lavender rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
