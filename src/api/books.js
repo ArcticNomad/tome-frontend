@@ -359,50 +359,59 @@ export async function fetchBecauseYouLiked(options = {}) {
 // Recommendations functions
 // In fetchRecommendations function, add more logging
 // In your src/api/books.js - FIXED fetchRecommendations function
+// In your src/api/books.js - CORRECT fetchRecommendations function
 export async function fetchRecommendations(options = {}) {
   console.log('📞 fetchRecommendations called with options:', options);
   
-  // Get the user and token directly
-  const { auth } = await import('../firebase/config');
-  const currentUser = auth.currentUser;
-  
-  console.log('👤 Current user:', currentUser?.uid);
-  
-  if (!currentUser) {
-    console.log('❌ No user logged in, cannot fetch personalized recommendations');
-    throw new Error('User not authenticated');
-  }
-  
-  const token = await currentUser.getIdToken();
-  console.log('🔑 Token available:', !!token);
-  
-  // Build the query string properly
-  const params = new URLSearchParams();
-  if (options.limit) params.append('limit', options.limit);
-  
-  const queryString = params.toString();
-  const endpoint = `/books/similar-recommendations${queryString ? `?${queryString}` : ''}`;
-  
-  console.log('🌐 Calling endpoint:', endpoint);
-  console.log('🔗 Full URL:', `${API_BASE_URL}${endpoint}`);
-  
-  // Make the request directly with the token
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+  try {
+    // Get token and user info directly
+    const { auth } = await import('../firebase/config');
+    const currentUser = auth.currentUser;
+    
+    console.log('👤 Current user exists:', !!currentUser);
+    console.log('👤 Current user UID:', currentUser?.uid);
+    
+    if (!currentUser) {
+      console.log('❌ No current user - cannot fetch personalized recommendations');
+      throw new Error('User not authenticated');
     }
-  });
-  
-  if (!response.ok) {
-    console.error(`❌ API Error: ${response.status}`);
-    throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const token = await currentUser.getIdToken();
+    console.log('🔑 Token obtained:', token ? `Yes (${token.substring(0, 20)}...)` : 'No token');
+    
+    const limit = options.limit || 20;
+    const endpoint = `/books/similar-recommendations?limit=${limit}`;
+    
+    console.log('🌐 Calling endpoint:', endpoint);
+    console.log('🔗 Full URL:', `${API_BASE_URL}${endpoint}`);
+    
+    // Make the request directly with the token
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      console.error(`❌ API Error: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('✅ Response received:', { 
+      success: data.success, 
+      dataLength: data.data?.length,
+      source: data.source,
+      userRegistered: data.userRegistered,
+      message: data.message
+    });
+    
+    return data;
+  } catch (error) {
+    console.error('❌ Error in fetchRecommendations:', error);
+    throw error;
   }
-  
-  const data = await response.json();
-  console.log('✅ Response received:', data);
-  
-  return data;
 }
 export async function fetchRelatedBooks(bookId, limit = 10) {
   return apiRequest(`/books/${bookId}/related?limit=${limit}`);
