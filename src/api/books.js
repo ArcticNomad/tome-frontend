@@ -1,4 +1,5 @@
 // src/api/books.js
+import { auth } from '../firebase/config';
 export const API_BASE_URL = 'https://tome-backend-production-5402.up.railway.app/api';
 
 console.log('🌐 API_BASE_URL configured as:', API_BASE_URL);
@@ -8,7 +9,6 @@ console.log('📡 VITE_API_URL from env:', import.meta.env.VITE_API_URL);
 // Helper function to get auth token
 const getAuthToken = async () => {
   try {
-    const { auth } = await import('../firebase/config');
     const user = auth.currentUser;
     return user ? await user.getIdToken() : null;
   } catch (error) {
