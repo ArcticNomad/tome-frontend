@@ -8,6 +8,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useBook, useBookReviews } from '../hooks/useBookData';
+import { fetchRelatedBooks } from '../api/books';
 import HorizontalCarousel from '../components/HomePage/HorizontalCarousel';
 const BookDetails = () => {
   const { id } = useParams();
@@ -81,21 +82,19 @@ useEffect(() => {
  // Update the fetchRelated useEffect to log the response
 useEffect(() => {
   const fetchRelated = async () => {
+    if (!id) return;
     setIsLoadingRelated(true);
     try {
       console.log('📚 Fetching related books for book ID:', id);
-      const relatedResponse = await fetch(`/api/books/${id}/related`);
+      const relatedResponse = await fetchRelatedBooks(id);
       
-      console.log('📡 Related books response status:', relatedResponse.status);
+      console.log('📡 Related books response status:', relatedResponse.success ? 'Success' : 'Failed');
       
-      if (relatedResponse.ok) {
-        const relatedData = await relatedResponse.json();
-        console.log('📦 Related books data:', relatedData);
-        console.log('📊 Number of related books:', relatedData.data?.length || 0);
-        setRelatedBooks(relatedData.data || []);
+      if (relatedResponse.success) {
+        console.log('📦 Related books data:', relatedResponse.data);
+        setRelatedBooks(relatedResponse.data || []);
       } else {
-        const errorText = await relatedResponse.text();
-        console.error('❌ Related books API error:', errorText);
+        console.error('❌ Related books API error:', relatedResponse.message);
         setRelatedBooks([]);
       }
     } catch (err) {
@@ -105,7 +104,7 @@ useEffect(() => {
       setIsLoadingRelated(false);
     }
   };
-  if (id) fetchRelated();
+  fetchRelated();
 }, [id]);
   const handleAddToBookshelf = async (shelfType) => {
   if (!currentUser) return navigate('/login');

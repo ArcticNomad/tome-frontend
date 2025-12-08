@@ -148,7 +148,7 @@ export const fetchBooksPaginated = async (params = {}) => {
 // Review functions
 export async function fetchBookReviews(bookId, params = {}) {
   const queryString = new URLSearchParams(params).toString();
-  return apiRequest(`/reviews/book/${bookId}${queryString ? `?${queryString}` : ''}`);
+  return apiRequest(`/books/${bookId}/reviews${queryString ? `?${queryString}` : ''}`);
 }
 
 export async function fetchUserReviews(userId = '') {
@@ -362,8 +362,70 @@ export async function fetchRecommendations(options = {}) {
   }
 }
 
+// src/api/books.js - Update fetchRelatedBooks function
 export async function fetchRelatedBooks(bookId, limit = 10) {
-  return apiRequest(`/books/${bookId}/related?limit=${limit}`);
+  try {
+    console.log(`📞 fetchRelatedBooks called for bookId: ${bookId}`);
+    
+    const token = await getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    };
+    
+    // Add the user's firebase UID if available
+    if (auth.currentUser?.uid) {
+      headers['firebase-uid'] = auth.currentUser.uid;
+    }
+    
+    const queryString = new URLSearchParams({ limit }).toString();
+    const url = `${API_BASE_URL}/books/${bookId}/related${queryString ? `?${queryString}` : ''}`;
+    
+    console.log(`🌐 Calling related books endpoint: ${url}`);
+    console.log(`🔑 Headers:`, { 
+      hasToken: !!token, 
+      hasFirebaseUid: !!headers['firebase-uid'] 
+    });
+    
+    const response = await fetch(url, { headers });
+    
+    console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+    
+    if (response.status === 404) {
+      console.log('⚠️ Related books endpoint returned 404');
+      return {
+        success: false,
+        status: 404,
+        message: 'Related books endpoint not found',
+        data: []
+      };
+    }
+    
+    if (!response.ok) {
+      console.error(`❌ HTTP error! Status: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`❌ Error response body:`, errorText);
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`✅ Related books response:`, { 
+      success: data.success, 
+      dataLength: data.data?.length 
+    });
+    
+    return data;
+    
+  } catch (error) {
+    console.error('❌ Error in fetchRelatedBooks:', error.message);
+    
+    // Return empty array instead of throwing
+    return {
+      success: false,
+      message: error.message,
+      data: []
+    };
+  }
 }
 
 // Get all homepage data in one call
