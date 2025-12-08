@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Maximize2, Minimize2, ChevronLeft, ChevronRight, Settings, BookOpen, Bookmark, Download } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useUserProfile } from '../hooks/useUserProfile';
-
+import { API_BASE_URL } from '../api/books';
 // Import modular components
 import ReaderHeader from '../components/reader/ReaderHeader';
 import ReaderControls from '../components/reader/ReaderControls';
@@ -58,11 +58,11 @@ const BookReaderPage = () => {
     
     try {
       // Use the new endpoint that includes fullTextUrl
-      const bookResponse = await fetch(`/api/books/${bookId}/full`);
+     const bookResponse = await fetch(`${API_BASE_URL}/books/${bookId}/full`);
       
       if (!bookResponse.ok) {
         // Fallback to regular endpoint if new one fails
-        const fallbackResponse = await fetch(`/api/books/${bookId}`);
+            const fallbackResponse = await fetch(`${API_BASE_URL}/books/${bookId}`);
         if (!fallbackResponse.ok) throw new Error(`Failed to fetch book: ${fallbackResponse.status}`);
         
         const fallbackData = await fallbackResponse.json();
@@ -130,9 +130,9 @@ const BookReaderPage = () => {
     
     try {
       // Use the new content endpoint with pagination
-      const contentResponse = await fetch(
-        `/api/books/${bookId}/content?page=${page}&wordsPerPage=${wordsPerPage}`
-      );
+     const contentResponse = await fetch(
+      `${API_BASE_URL}/books/${bookId}/content?page=${page}&wordsPerPage=${wordsPerPage}`
+    );
       
       if (contentResponse.ok) {
         const contentData = await contentResponse.json();
