@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Star, BookOpen, MessageSquareHeart, ThumbsUp, ExternalLink, Edit, Trash2 } from 'lucide-react';
 import { fetchUserReviews, deleteReview, updateReview } from '../../api/books'; // Adjust path as needed
-
+import { useNavigate } from 'react-router-dom';
 const UserReviewsPrompt = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,7 +10,7 @@ const UserReviewsPrompt = () => {
   const [editContent, setEditContent] = useState('');
   const [editRating, setEditRating] = useState(5);
   const [editTitle, setEditTitle] = useState('');
-
+const navigate = useNavigate();
   useEffect(() => {
     loadUserReviews();
   }, []);
@@ -377,12 +377,12 @@ const UserReviewsPrompt = () => {
                   </div>
                   
                 {(review.bookId?.gutenbergId || review.book?.gutenbergId || review.bookId) && (
- <Link 
-  to={`/book/${review.bookId?.gutenbergId || review.book?.gutenbergId || review.bookId}`}
+ <button 
+  onClick={() => navigate(`/book/${review.bookId?.gutenbergId || review.book?.gutenbergId || review.bookId}`)}
   className="text-chill-rose hover:text-white text-sm font-medium transition-colors flex items-center gap-1"
 >
   View Book <ExternalLink size={14} />
-</Link>
+</button>
 )}
                 </div>
               </>
