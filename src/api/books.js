@@ -340,6 +340,7 @@ export async function fetchBecauseYouLiked(options = {}) {
 
 // Recommendations functions
 // In fetchRecommendations function, add more logging
+// In your src/api/books.js - FIXED fetchRecommendations function
 export async function fetchRecommendations(options = {}) {
   console.log('📞 fetchRecommendations called with options:', options);
   
@@ -349,24 +350,21 @@ export async function fetchRecommendations(options = {}) {
   console.log('👤 Current user:', currentUser?.uid);
   console.log('🔑 Token available:', !!token);
   
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` }),
-    ...(currentUser?.uid && { 'firebaseuid': currentUser.uid }),
-  };
-  
-  console.log('📋 Request headers:', headers);
+  // DON'T create custom headers - let apiRequest handle it
+  // The firebaseuid header should be added in a different way
   
   const queryString = new URLSearchParams(options).toString();
   const endpoint = `/books/similar-recommendations${queryString ? `?${queryString}` : ''}`;
   
   console.log('🌐 Calling endpoint:', endpoint);
   
-  const response = await apiRequest(endpoint, { headers });
+  // Let apiRequest handle headers - it already adds Authorization
+  const response = await apiRequest(endpoint);
   console.log('✅ Response received:', response);
   
   return response;
 }
+
 export async function fetchRelatedBooks(bookId, limit = 10) {
   return apiRequest(`/books/${bookId}/related?limit=${limit}`);
 }
