@@ -1,5 +1,5 @@
 // src/hooks/useBecauseYouLiked.js
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
 import { standardBooks } from '../data';
 import { fetchBecauseYouLiked } from '../api/books';
@@ -13,15 +13,25 @@ export const useBecauseYouLiked = (options = {}) => {
   const [sourceBook, setSourceBook] = useState(null);
   const [message, setMessage] = useState('');
   
+  // Use ref to prevent infinite loops
+  const isFetchingRef = useRef(false);
+  
   const {
     limit = 10,
     autoFetch = true
   } = options;
 
   const fetchBecauseYouLikedData = useCallback(async () => {
+    // Prevent multiple simultaneous fetches
+    if (isFetchingRef.current) {
+      console.log('⚠️ Already fetching, skipping...');
+      return;
+    }
+    
     if (!autoFetch) return;
     
     try {
+      isFetchingRef.current = true;
       setIsLoading(true);
       setError(null);
       console.log('🔄 Fetching "Because You Liked" recommendations...');
@@ -34,6 +44,7 @@ export const useBecauseYouLiked = (options = {}) => {
         setSource('no_user');
         setMessage('Sign in to get personalized recommendations');
         setIsLoading(false);
+        isFetchingRef.current = false;
         return;
       }
       
@@ -58,16 +69,12 @@ export const useBecauseYouLiked = (options = {}) => {
           setSource(response.source || 'unknown');
           setSourceBook(response.sourceBook || null);
           setMessage(response.message || '');
-          setIsLoading(false);
-          return;
         } else if (response.success && (!response.data || response.data.length === 0)) {
           // API succeeded but returned empty data
           console.log('⚠️ API returned empty data');
           setRecommendations(standardBooks.slice(0, limit));
           setSource(response.source || 'empty_response');
           setMessage(response.message || 'Rate more books to get personalized recommendations');
-          setIsLoading(false);
-          return;
         } else {
           // API returned failure
           console.log('⚠️ API returned failure:', response.message);
@@ -75,14 +82,11 @@ export const useBecauseYouLiked = (options = {}) => {
         }
       } catch (apiError) {
         console.error('❌ Because You Liked API error:', apiError.message);
-        console.error('Error stack:', apiError.stack);
         
         // Fallback to sample data on API error
         setRecommendations(standardBooks.slice(0, limit));
         setSource('api_error_fallback');
         setMessage('Popular books you might like');
-        setIsLoading(false);
-        return;
       }
       
     } catch (error) {
@@ -92,23 +96,23 @@ export const useBecauseYouLiked = (options = {}) => {
       setSource('error_fallback');
       setMessage('Something went wrong');
     } finally {
-      // Ensure loading is set to false
-      if (isLoading) {
-        setIsLoading(false);
-      }
+      // Always set loading to false and reset the ref
+      setIsLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [currentUser, limit, autoFetch, isLoading]);
+  }, [currentUser, limit, autoFetch]); // Removed isLoading from dependencies
 
   const refresh = useCallback(() => {
     console.log('🔄 Refreshing Because You Liked recommendations...');
     fetchBecauseYouLikedData();
   }, [fetchBecauseYouLikedData]);
 
+  // Initial fetch - only when auth loading is done
   useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && autoFetch && !isFetchingRef.current) {
       fetchBecauseYouLikedData();
     }
-  }, [fetchBecauseYouLikedData, authLoading]);
+  }, [authLoading, autoFetch, fetchBecauseYouLikedData]);
 
   // Log when recommendations update
   useEffect(() => {
