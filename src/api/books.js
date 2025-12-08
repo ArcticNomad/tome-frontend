@@ -358,74 +358,144 @@ export async function fetchBecauseYouLiked(options = {}) {
 
 // Recommendations functions
 
-// Recommendations functions - DEBUG VERSION
-export async function fetchRecommendations(options = {}) {
-  console.log('📞 [DEBUG] fetchRecommendations called with options:', options);
-  
-  try {
-    console.log('1️⃣ Step 1: Starting function');
-    
-    // Get token and user info directly
-    console.log('2️⃣ Step 2: Importing Firebase config');
-    const { auth } = await import('../firebase/config');
-    
-    console.log('3️⃣ Step 3: Getting current user');
-    const currentUser = auth.currentUser;
-    
-    console.log('👤 Current user exists:', !!currentUser);
-    console.log('👤 Current user UID:', currentUser?.uid);
-    
-    if (!currentUser) {
-      console.log('❌ No current user - cannot fetch personalized recommendations');
-      throw new Error('User not authenticated');
-    }
-    
-    console.log('4️⃣ Step 4: Getting token');
-    const token = await currentUser.getIdToken();
-    console.log('🔑 Token obtained:', token ? `Yes (${token.substring(0, 20)}...)` : 'No token');
-    
-    console.log('5️⃣ Step 5: Building request');
-    const limit = options.limit || 20;
-    const endpoint = `/books/similar-recommendations?limit=${limit}`;
-    const url = `${API_BASE_URL}${endpoint}`;
-    
-    console.log('🌐 Calling endpoint:', endpoint);
-    console.log('🔗 Full URL:', url);
-    
-    console.log('6️⃣ Step 6: Making fetch request');
-    // Make the request directly with the token
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    console.log('7️⃣ Step 7: Checking response');
-    if (!response.ok) {
-      console.error(`❌ API Error: ${response.status}`);
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    console.log('8️⃣ Step 8: Parsing response');
-    const data = await response.json();
-    console.log('✅ Response received:', { 
-      success: data.success, 
-      dataLength: data.data?.length,
-      source: data.source,
-      userRegistered: data.userRegistered,
-      message: data.message
-    });
-    
-    console.log('9️⃣ Step 9: Returning data');
-    return data;
-  } catch (error) {
-    console.error('❌ [DEBUG] Error in fetchRecommendations:', error);
-    console.error('❌ [DEBUG] Error stack:', error.stack);
-    throw error;
-  }
-}
+// In your useRecommendations.js - FIXED VERSION
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from './useAuth';
+import { fetchRecommendations, fetchPopularBooks } from '../api/books';
+import { standardBooks } from '../data';
 
+export const useRecommendations = (options = {}) => {
+  const { currentUser, loading: authLoading, getIdToken } = useAuth(); // <-- ADD getIdToken
+  const [recommendations, setRecommendations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [source, setSource] = useState('fallback');
+  const [userGenres, setUserGenres] = useState([]);
+  
+  const {
+    limit = 20,
+    fallbackToPopular = true,
+    showPersonalized = true,
+    autoFetch = true
+  } = options;
+
+  const fetchRecommendationsData = useCallback(async () => {
+    if (!autoFetch) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      console.log('🔄 Starting recommendations fetch...');
+      
+      // If user is logged in and we want personalized recommendations
+      if (currentUser && showPersonalized) {
+        try {
+          console.log('👤 User is logged in, fetching personalized recommendations...');
+          
+          // USE THE PROPER FUNCTION FROM books.js
+          const response = await fetchRecommendations({ limit });
+          
+          console.log('📡 API response structure:', {
+            success: response.success,
+            dataLength: response.data?.length,
+            userGenres: response.userGenres,
+            source: response.source,
+            message: response.message
+          });
+          
+          // Check if we have valid recommendations
+          if (response.success && response.data && response.data.length > 0) {
+            console.log(`✅ Found ${response.data.length} recommendations (source: ${response.source})`);
+            
+            // DEBUG: Log the actual book titles
+            console.log('📚 Books returned:', response.data.map(b => b.title).slice(0, 5));
+            
+            setRecommendations(response.data);
+            setUserGenres(response.userGenres || []);
+            setSource(response.source || 'personalized');
+            setIsLoading(false);
+            return;
+          } else {
+            console.log('⚠️ API returned empty or invalid data:', response);
+          }
+        } catch (recError) {
+          console.error('❌ Personalized recommendations failed:', recError);
+          // Continue to fallback
+        }
+      }
+      
+      // Fallback 1: Try popular books from API
+      if (fallbackToPopular) {
+        try {
+          console.log('📊 Falling back to popular books from API...');
+          const popularResponse = await fetchPopularBooks(limit);
+          
+          if (popularResponse.success && popularResponse.data && popularResponse.data.length > 0) {
+            console.log(`✅ Found ${popularResponse.data.length} popular books`);
+            setRecommendations(popularResponse.data);
+            setUserGenres([]);
+            setSource('popular_api');
+            setIsLoading(false);
+            return;
+          }
+        } catch (popularError) {
+          console.warn('⚠️ API popular books failed:', popularError.message);
+        }
+      }
+      
+      // Fallback 2: Use local sample data
+      console.log('🔄 Using local sample data as final fallback');
+      setRecommendations(standardBooks.slice(0, limit));
+      setUserGenres([]);
+      setSource('local_fallback');
+      
+    } catch (error) {
+      console.error('❌ Error in recommendation flow:', error);
+      setError(error.message);
+      
+      // Ultimate fallback
+      setRecommendations(standardBooks.slice(0, Math.min(limit, 10)));
+      setUserGenres([]);
+      setSource('error_fallback');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentUser, limit, fallbackToPopular, showPersonalized, autoFetch]);
+
+  const refresh = useCallback(() => {
+    fetchRecommendationsData();
+  }, [fetchRecommendationsData]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      fetchRecommendationsData();
+    }
+  }, [fetchRecommendationsData, authLoading]);
+
+  // DEBUG: Log when recommendations change
+  useEffect(() => {
+    if (recommendations.length > 0) {
+      console.log('🎯 Recommendations updated:', {
+        count: recommendations.length,
+        source,
+        userGenres,
+        books: recommendations.slice(0, 3).map(b => b.title)
+      });
+    }
+  }, [recommendations, source, userGenres]);
+
+  return {
+    recommendations,
+    isLoading,
+    error,
+    source,
+    userGenres,
+    isPersonalized: source === 'personalized' || source.includes('embeddings'),
+    hasRecommendations: recommendations.length > 0,
+    refresh,
+    isEmpty: !isLoading && recommendations.length === 0
+  };
+};
 export async function fetchRelatedBooks(bookId, limit = 10) {
   return apiRequest(`/books/${bookId}/related?limit=${limit}`);
 }
