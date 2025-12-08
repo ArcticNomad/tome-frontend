@@ -76,7 +76,7 @@ const App = () => {
                 key={i}
                 className={`${book.color} ${book.height} w-6 md:w-12 rounded-sm shadow-xl flex flex-col items-center justify-center text-[10px] font-bold text-black/60 writing-vertical border-l border-white/20 transform ${book.rotate} origin-bottom transition-transform duration-500 hover:-translate-y-2`}
               >
-                <span className="rotate-90 whitespace-nowrap opacity-0 md:opacity-100 transition-opacity">{book.title}</span>
+                <span className="whitespace-nowrap opacity-0 md:opacity-100 transition-opacity">{book.title}</span>
               </div>
             ))}
           </div>
