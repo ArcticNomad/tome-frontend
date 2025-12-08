@@ -5,9 +5,13 @@
 
 // Get the API URL from environment variables
 // src/api/books.js - Line 3
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://tome-backend-production-5402.up.railway.app/api');
+// export const API_BASE_URL = import.meta.env.VITE_API_URL || 
+//   (import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://tome-backend-production-5402.up.railway.app/api');
   
+
+export const API_BASE_URL = 'https://tome-backend-production-5402.up.railway.app/api';
+
+
 console.log('🌐 API_BASE_URL configured as:', API_BASE_URL);
 console.log('🔧 Environment mode:', import.meta.env.MODE);
 console.log('📡 VITE_API_URL from env:', import.meta.env.VITE_API_URL);
