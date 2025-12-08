@@ -378,7 +378,7 @@ const UserReviewsPrompt = () => {
                   
                 {(review.bookId?.gutenbergId || review.book?.gutenbergId || review.bookId) && (
   <button 
-    onClick={() => window.location.href = `/book/${review.bookId?.gutenbergId || review.book?.gutenbergId || review.bookId}`}
+    onClick={() => window.location.href = `api/book/${review.bookId?.gutenbergId || review.book?.gutenbergId || review.bookId}`}
     className="text-chill-rose hover:text-white text-sm font-medium transition-colors flex items-center gap-1"
   >
     View Book <ExternalLink size={14} />

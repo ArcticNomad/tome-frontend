@@ -38,9 +38,19 @@ export const useAuth = () => {
   };
 
   // Logout function
-  const logout = () => {
-    return signOut(auth);
+   const logout = async () => {
+    try {
+      await signOut(auth);
+      // Redirect to homepage after logout
+      window.location.href = '/'; // This will work everywhere
+      // OR if you want React Router:
+      // navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   };
+
 
   // Listen for auth state changes
   useEffect(() => {
