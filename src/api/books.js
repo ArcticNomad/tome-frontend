@@ -357,15 +357,19 @@ export async function fetchBecauseYouLiked(options = {}) {
 
 
 // Recommendations functions
-// In fetchRecommendations function, add more logging
-// In your src/api/books.js - FIXED fetchRecommendations function
-// In your src/api/books.js - CORRECT fetchRecommendations function
+
+// Recommendations functions - DEBUG VERSION
 export async function fetchRecommendations(options = {}) {
-  console.log('📞 fetchRecommendations called with options:', options);
+  console.log('📞 [DEBUG] fetchRecommendations called with options:', options);
   
   try {
+    console.log('1️⃣ Step 1: Starting function');
+    
     // Get token and user info directly
+    console.log('2️⃣ Step 2: Importing Firebase config');
     const { auth } = await import('../firebase/config');
+    
+    console.log('3️⃣ Step 3: Getting current user');
     const currentUser = auth.currentUser;
     
     console.log('👤 Current user exists:', !!currentUser);
@@ -376,28 +380,34 @@ export async function fetchRecommendations(options = {}) {
       throw new Error('User not authenticated');
     }
     
+    console.log('4️⃣ Step 4: Getting token');
     const token = await currentUser.getIdToken();
     console.log('🔑 Token obtained:', token ? `Yes (${token.substring(0, 20)}...)` : 'No token');
     
+    console.log('5️⃣ Step 5: Building request');
     const limit = options.limit || 20;
     const endpoint = `/books/similar-recommendations?limit=${limit}`;
+    const url = `${API_BASE_URL}${endpoint}`;
     
     console.log('🌐 Calling endpoint:', endpoint);
-    console.log('🔗 Full URL:', `${API_BASE_URL}${endpoint}`);
+    console.log('🔗 Full URL:', url);
     
+    console.log('6️⃣ Step 6: Making fetch request');
     // Make the request directly with the token
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
     
+    console.log('7️⃣ Step 7: Checking response');
     if (!response.ok) {
       console.error(`❌ API Error: ${response.status}`);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
+    console.log('8️⃣ Step 8: Parsing response');
     const data = await response.json();
     console.log('✅ Response received:', { 
       success: data.success, 
@@ -407,12 +417,15 @@ export async function fetchRecommendations(options = {}) {
       message: data.message
     });
     
+    console.log('9️⃣ Step 9: Returning data');
     return data;
   } catch (error) {
-    console.error('❌ Error in fetchRecommendations:', error);
+    console.error('❌ [DEBUG] Error in fetchRecommendations:', error);
+    console.error('❌ [DEBUG] Error stack:', error.stack);
     throw error;
   }
 }
+
 export async function fetchRelatedBooks(bookId, limit = 10) {
   return apiRequest(`/books/${bookId}/related?limit=${limit}`);
 }
