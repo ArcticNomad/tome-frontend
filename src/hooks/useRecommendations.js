@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { fetchRecommendations, fetchPopularBooks } from '../api/books';
 import { standardBooks } from '../data';
+import { API_BASE_URL } from '../api/books';
 
 export const useRecommendations = (options = {}) => {
   const { currentUser, loading: authLoading } = useAuth();
@@ -33,7 +34,13 @@ export const useRecommendations = (options = {}) => {
           console.log('👤 User is logged in, fetching personalized recommendations...');
           
           // Fetch personalized recommendations (USING YOUR EMBEDDINGS SYSTEM)
-          const response = await fetchRecommendations({ limit });
+           const response = await fetch(`${API_BASE_URL}/books/similar-recommendations?limit=${limit}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
           console.log('📡 API response structure:', {
             success: response.success,
             dataLength: response.data?.length,

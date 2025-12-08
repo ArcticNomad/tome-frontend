@@ -29,9 +29,17 @@ const getAuthToken = async () => {
 };
 
 // Generic API request function
+// In your apiRequest function, add more logging:
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
+  
+  console.log(`[API] Preparing request to: ${url}`);
+  console.log(`[API] Endpoint: ${endpoint}`);
+  
   const token = await getAuthToken();
+  
+  console.log(`[API] Token obtained:`, token ? `Yes (${token.substring(0, 20)}...)` : 'No token');
+  console.log(`[API] Current endpoint requires auth:`, endpoint.includes('similar-recommendations') || endpoint.includes('because-you-liked'));
   
   const config = {
     method: 'GET',
@@ -44,16 +52,23 @@ async function apiRequest(endpoint, options = {}) {
   };
 
   console.log(`[API] ${config.method} ${url}`);
+  console.log(`[API] Headers sent:`, config.headers);
   
   try {
     const response = await fetch(url, config);
 
     if (!response.ok) {
+      console.error(`[API] Error response:`, response.status, response.statusText);
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log(`[API] Success:`, data);
+    console.log(`[API] Success:`, { 
+      success: data.success, 
+      dataLength: data.data?.length,
+      source: data.source,
+      userRegistered: data.userRegistered 
+    });
     return data;
     
   } catch (error) {
@@ -61,7 +76,6 @@ async function apiRequest(endpoint, options = {}) {
     throw error;
   }
 }
-
 // Keep all your existing functions below...
 // They should now work correctly
 // Book API functions
@@ -348,27 +362,48 @@ export async function fetchBecauseYouLiked(options = {}) {
 export async function fetchRecommendations(options = {}) {
   console.log('📞 fetchRecommendations called with options:', options);
   
-  const token = await getAuthToken();
-  const currentUser = (await import('../firebase/config')).auth.currentUser;
+  // Get the user and token directly
+  const { auth } = await import('../firebase/config');
+  const currentUser = auth.currentUser;
   
   console.log('👤 Current user:', currentUser?.uid);
+  
+  if (!currentUser) {
+    console.log('❌ No user logged in, cannot fetch personalized recommendations');
+    throw new Error('User not authenticated');
+  }
+  
+  const token = await currentUser.getIdToken();
   console.log('🔑 Token available:', !!token);
   
-  // DON'T create custom headers - let apiRequest handle it
-  // The firebaseuid header should be added in a different way
+  // Build the query string properly
+  const params = new URLSearchParams();
+  if (options.limit) params.append('limit', options.limit);
   
-  const queryString = new URLSearchParams(options).toString();
+  const queryString = params.toString();
   const endpoint = `/books/similar-recommendations${queryString ? `?${queryString}` : ''}`;
   
   console.log('🌐 Calling endpoint:', endpoint);
+  console.log('🔗 Full URL:', `${API_BASE_URL}${endpoint}`);
   
-  // Let apiRequest handle headers - it already adds Authorization
-  const response = await apiRequest(endpoint);
-  console.log('✅ Response received:', response);
+  // Make the request directly with the token
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
   
-  return response;
+  if (!response.ok) {
+    console.error(`❌ API Error: ${response.status}`);
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  const data = await response.json();
+  console.log('✅ Response received:', data);
+  
+  return data;
 }
-
 export async function fetchRelatedBooks(bookId, limit = 10) {
   return apiRequest(`/books/${bookId}/related?limit=${limit}`);
 }
