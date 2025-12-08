@@ -1,16 +1,5 @@
 // src/api/books.js
-// For development, use localhost; for production, use relative path
-// src/api/books.js - FIXED VERSION
-// USE THIS EXACT CODE:
-
-// Get the API URL from environment variables
-// src/api/books.js - Line 3
-// export const API_BASE_URL = import.meta.env.VITE_API_URL || 
-//   (import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://tome-backend-production-5402.up.railway.app/api');
-  
-
 export const API_BASE_URL = 'https://tome-backend-production-5402.up.railway.app/api';
-
 
 console.log('🌐 API_BASE_URL configured as:', API_BASE_URL);
 console.log('🔧 Environment mode:', import.meta.env.MODE);
@@ -29,7 +18,6 @@ const getAuthToken = async () => {
 };
 
 // Generic API request function
-// In your apiRequest function, add more logging:
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   
@@ -76,13 +64,8 @@ async function apiRequest(endpoint, options = {}) {
     throw error;
   }
 }
-// Keep all your existing functions below...
-// They should now work correctly
+
 // Book API functions
-
-
-// frontend/src/api/books.js - CORRECTED
-
 export const hybridSearchBooks = async (query, params = {}) => {
   try {
     const queryString = new URLSearchParams({
@@ -129,7 +112,7 @@ export const quickSearchBooks = async (query, params = {}) => {
     return { success: false, message: 'Failed to perform quick search' };
   }
 };
-// frontend/src/api/books.js - Add paginated endpoint
+
 export const fetchBooksPaginated = async (params = {}) => {
   try {
     const queryString = new URLSearchParams({
@@ -156,6 +139,7 @@ export async function fetchBookReviews(bookId, params = {}) {
   const queryString = new URLSearchParams(params).toString();
   return apiRequest(`/reviews/book/${bookId}${queryString ? `?${queryString}` : ''}`);
 }
+
 export async function fetchUserReviews(userId = '') {
   try {
     const token = await getAuthToken();
@@ -165,9 +149,7 @@ export async function fetchUserReviews(userId = '') {
       ...(token && { 'Authorization': `Bearer ${token}` }),
     };
     
-    // For current user's reviews
     const endpoint = '/reviews/user/mine';
-    
     const url = `${API_BASE_URL}${endpoint}`;
     const response = await fetch(url, { headers });
     
@@ -253,7 +235,6 @@ export async function checkAvailability(field, value) {
   return apiRequest(`/users/profile/check-availability?field=${field}&value=${encodeURIComponent(value)}`);
 }
 
-
 export async function fetchAllBooks(params = {}) {
   const queryString = new URLSearchParams(params).toString();
   const endpoint = `/books${queryString ? `?${queryString}` : ''}`;
@@ -268,7 +249,6 @@ export async function searchBooks(query, filters = {}) {
   const params = { q: query, ...filters };
   return apiRequest(`/books/search`, { params });
 }
-
 
 export async function fetchBooksByAuthor(author, page = 1) {
   return apiRequest(`/books/author/${author}?page=${page}`);
@@ -299,8 +279,6 @@ export async function fetchReadingHistory() {
 export async function fetchFavoriteBooks() {
   return apiRequest('/users/favorites');
 }
-
-// Add these functions to your existing src/api/books.js
 
 // Homepage-specific functions
 export async function fetchRecentlyAdded(limit = 10) {
@@ -341,6 +319,7 @@ export async function fetchBooksByGenre(genre, limit = 10) {
     };
   }
 }
+
 export async function fetchHighlyReviewedBooks(limit = 8) {
   return apiRequest(`/books/community/reviews?limit=${limit}`);
 }
@@ -349,17 +328,12 @@ export async function fetchHomepageStats() {
   return apiRequest('/books/stats/homepage');
 }
 
-// Add to src/api/books.js
 export async function fetchBecauseYouLiked(options = {}) {
   const queryString = new URLSearchParams(options).toString();
   return apiRequest(`/books/because-you-liked${queryString ? `?${queryString}` : ''}`);
 }
 
-
 // Recommendations functions
-
-// Recommendations functions - DEBUG VERSION
-// In books.js, add this function:
 export async function fetchRecommendations(options = {}) {
   console.log('📞 fetchRecommendations called with options:', options);
   
@@ -369,7 +343,6 @@ export async function fetchRecommendations(options = {}) {
     
     console.log('🌐 Calling endpoint:', endpoint);
     
-    // Use apiRequest which already handles authentication
     return await apiRequest(endpoint);
   } catch (error) {
     console.error('❌ Error in fetchRecommendations:', error);
@@ -377,10 +350,6 @@ export async function fetchRecommendations(options = {}) {
   }
 }
 
-// Then continue with other functions...
-export async function fetchRelatedBooks(bookId, limit = 10) {
-  return apiRequest(`/books/${bookId}/related?limit=${limit}`);
-}
 export async function fetchRelatedBooks(bookId, limit = 10) {
   return apiRequest(`/books/${bookId}/related?limit=${limit}`);
 }
@@ -390,7 +359,6 @@ export async function fetchHomepageData() {
   try {
     console.log('[API] Fetching all homepage data...');
     
-    // Fetch all data in parallel
     const [
       allBooksResponse,
       recentlyAddedResponse,
@@ -409,7 +377,6 @@ export async function fetchHomepageData() {
       fetchHomepageStats()
     ]);
 
-    // Process responses
     const processResponse = (response, fallback = []) => {
       if (response.status === 'fulfilled' && response.value.success) {
         return response.value.data;
@@ -429,8 +396,6 @@ export async function fetchHomepageData() {
         stats: processResponse(statsResponse, null)
       }
     };
-
-    
 
   } catch (error) {
     console.error('[API] Failed to fetch homepage data:', error);
