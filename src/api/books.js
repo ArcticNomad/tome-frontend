@@ -365,7 +365,13 @@ export async function fetchRecommendations(options = {}) {
 // src/api/books.js - Update fetchRelatedBooks function
 export async function fetchRelatedBooks(bookId, limit = 10) {
   try {
-    console.log(`📞 fetchRelatedBooks called for bookId: ${bookId}`);
+    console.log(`📞 [fetchRelatedBooks] Called for bookId: ${bookId}`);
+    console.log(`📡 [fetchRelatedBooks] API_BASE_URL: ${API_BASE_URL}`);
+    
+    // Clean the bookId - remove any path segments
+    const cleanBookId = bookId.split('/').pop(); // Get the last segment if it's a path
+    
+    console.log(`🔧 [fetchRelatedBooks] Cleaned bookId: ${cleanBookId}`);
     
     const token = await getAuthToken();
     const headers = {
@@ -373,53 +379,52 @@ export async function fetchRelatedBooks(bookId, limit = 10) {
       ...(token && { 'Authorization': `Bearer ${token}` }),
     };
     
-    // Add the user's firebase UID if available
+    // Add firebase-uid header if user exists
     if (auth.currentUser?.uid) {
       headers['firebase-uid'] = auth.currentUser.uid;
     }
     
     const queryString = new URLSearchParams({ limit }).toString();
-    const url = `${API_BASE_URL}/books/${bookId}/related${queryString ? `?${queryString}` : ''}`;
+    const url = `${API_BASE_URL}/books/${cleanBookId}/related${queryString ? `?${queryString}` : ''}`;
     
-    console.log(`🌐 Calling related books endpoint: ${url}`);
-    console.log(`🔑 Headers:`, { 
-      hasToken: !!token, 
-      hasFirebaseUid: !!headers['firebase-uid'] 
+    console.log(`🌐 [fetchRelatedBooks] Calling URL: ${url}`);
+    console.log(`📋 [fetchRelatedBooks] Headers:`, {
+      hasToken: !!token,
+      hasFirebaseUid: !!headers['firebase-uid'],
+      contentType: headers['Content-Type']
     });
     
     const response = await fetch(url, { headers });
     
-    console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+    console.log(`📡 [fetchRelatedBooks] Response status: ${response.status} ${response.statusText}`);
     
     if (response.status === 404) {
-      console.log('⚠️ Related books endpoint returned 404');
+      const errorText = await response.text();
+      console.error(`❌ [fetchRelatedBooks] 404 Error:`, errorText);
       return {
         success: false,
         status: 404,
         message: 'Related books endpoint not found',
+        error: errorText,
         data: []
       };
     }
     
     if (!response.ok) {
-      console.error(`❌ HTTP error! Status: ${response.status}`);
       const errorText = await response.text();
-      console.error(`❌ Error response body:`, errorText);
+      console.error(`❌ [fetchRelatedBooks] HTTP error ${response.status}:`, errorText);
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log(`✅ Related books response:`, { 
-      success: data.success, 
-      dataLength: data.data?.length 
-    });
+    console.log(`✅ [fetchRelatedBooks] Success! Found ${data.data?.length || 0} books`);
     
     return data;
     
   } catch (error) {
-    console.error('❌ Error in fetchRelatedBooks:', error.message);
+    console.error('❌ [fetchRelatedBooks] Fetch error:', error.message);
     
-    // Return empty array instead of throwing
+    // Return a structured error response
     return {
       success: false,
       message: error.message,

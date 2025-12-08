@@ -80,32 +80,72 @@ useEffect(() => {
 
   // Fetch Related Books
  // Update the fetchRelated useEffect to log the response
+// In your BookDetails component, update the fetchRelated useEffect
 useEffect(() => {
   const fetchRelated = async () => {
-    if (!id) return;
+    if (!id) {
+      console.log('⚠️ [BookDetails] No book ID provided');
+      return;
+    }
+    
     setIsLoadingRelated(true);
+    
+    // Log the ID we're using
+    console.log(`📚 [BookDetails] Fetching related books for ID: "${id}"`);
+    console.log(`📖 [BookDetails] Current book:`, {
+      _id: book?._id,
+      gutenbergId: book?.gutenbergId,
+      title: book?.title
+    });
+    
     try {
-      console.log('📚 Fetching related books for book ID:', id);
+      // Try with the ID from params
+      console.log(`🔄 [BookDetails] Calling fetchRelatedBooks with ID: "${id}"`);
       const relatedResponse = await fetchRelatedBooks(id);
       
-      console.log('📡 Related books response status:', relatedResponse.success ? 'Success' : 'Failed');
+      console.log(`📡 [BookDetails] fetchRelatedBooks response:`, {
+        success: relatedResponse.success,
+        status: relatedResponse.status,
+        dataLength: relatedResponse.data?.length,
+        message: relatedResponse.message,
+        error: relatedResponse.error
+      });
       
-      if (relatedResponse.success) {
-        console.log('📦 Related books data:', relatedResponse.data);
-        setRelatedBooks(relatedResponse.data || []);
+      if (relatedResponse.success && relatedResponse.data && relatedResponse.data.length > 0) {
+        console.log(`✅ [BookDetails] Found ${relatedResponse.data.length} related books`);
+        setRelatedBooks(relatedResponse.data);
       } else {
-        console.error('❌ Related books API error:', relatedResponse.message);
+        console.log(`⚠️ [BookDetails] No related books found, trying fallback...`);
+        
+        // Try fallback with book's gutenbergId if available
+        if (book?.gutenbergId && book.gutenbergId !== id) {
+          console.log(`🔄 [BookDetails] Trying with gutenbergId: ${book.gutenbergId}`);
+          const fallbackResponse = await fetchRelatedBooks(book.gutenbergId);
+          
+          if (fallbackResponse.success && fallbackResponse.data?.length > 0) {
+            console.log(`✅ [BookDetails] Found ${fallbackResponse.data.length} books with gutenbergId`);
+            setRelatedBooks(fallbackResponse.data);
+            return;
+          }
+        }
+        
         setRelatedBooks([]);
       }
     } catch (err) {
-      console.error('🚨 Failed to fetch related books', err);
+      console.error('🚨 [BookDetails] Failed to fetch related books', err);
       setRelatedBooks([]);
     } finally {
       setIsLoadingRelated(false);
     }
   };
-  fetchRelated();
-}, [id]);
+  
+  // Only fetch when book is loaded
+  if (book) {
+    fetchRelated();
+  } else {
+    console.log('⏳ [BookDetails] Book not loaded yet, waiting...');
+  }
+}, [id, book]);
   const handleAddToBookshelf = async (shelfType) => {
   if (!currentUser) return navigate('/login');
   try {
