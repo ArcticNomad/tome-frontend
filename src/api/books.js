@@ -1,15 +1,26 @@
 // src/api/books.js
 // For development, use localhost; for production, use relative path
+// src/api/books.js - FIXED VERSION
+// USE THIS EXACT CODE:
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? '/api'  // Vercel will rewrite this
-  : 'http://localhost:5000/api';
+// Get the API URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
+
+console.log('🌐 API_BASE_URL configured as:', API_BASE_URL);
+console.log('🔧 Environment mode:', import.meta.env.MODE);
+console.log('📡 VITE_API_URL from env:', import.meta.env.VITE_API_URL);
 
 // Helper function to get auth token
 const getAuthToken = async () => {
-  const { auth } = await import('../firebase/config');
-  const user = auth.currentUser;
-  return user ? await user.getIdToken() : null;
+  try {
+    const { auth } = await import('../firebase/config');
+    const user = auth.currentUser;
+    return user ? await user.getIdToken() : null;
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+    return null;
+  }
 };
 
 // Generic API request function
@@ -46,6 +57,8 @@ async function apiRequest(endpoint, options = {}) {
   }
 }
 
+// Keep all your existing functions below...
+// They should now work correctly
 // Book API functions
 
 
