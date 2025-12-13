@@ -4,9 +4,14 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  appType: 'spa',
   // NO PROXY - we're using direct Railway calls
   server: {
-    port: 5173
-  }
-})
+    port: 5173,
+    rewrites: [
+      {
+        source: /^\/(?!api|assets|\.well-known)(\/.*)?/,
+        destination: '/index.html',
+      },
+    ],
+  },
+});
