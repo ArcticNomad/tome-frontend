@@ -23,14 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 tome-bca58-firebase-adminsdk-fbsvc-f2a5b2a284.json
-*.json
-firebase-adminsdk-*.json
-tome-bca58-firebase-adminsdk-fbsvc-f2a5b2a284.json
-*.json
 firebase-adminsdk-*.json
 .env
 config/*.json
-.env
 .env.local
 .env.production
 .env.development
