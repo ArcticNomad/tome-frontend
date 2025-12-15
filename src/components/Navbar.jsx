@@ -344,7 +344,7 @@ const Navbar = () => {
               </div>
             </div>
 
-            <button onClick={() => navigate('/reader')} className="hover:text-chill-sage transition cursor-pointer text-white">Reader</button>
+            <button onClick={() => navigate('/reader')} className="hover:text-chill-sage transition cursor-pointer text-white">Reviews</button>
             <button onClick={() => navigate('/')} className="hover:text-chill-sage transition cursor-pointer text-white">About Us</button>
           </div>
 

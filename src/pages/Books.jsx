@@ -178,7 +178,7 @@ function Books() {
 </div>
               
               <BookSection 
-                title="all" 
+                
                 books={limitedBooks} 
                 isLoading={isLoading}
                 showViewAll={mainBookList.length > 18}
