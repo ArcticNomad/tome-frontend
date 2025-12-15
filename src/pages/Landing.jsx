@@ -357,7 +357,7 @@ const App = () => {
        - underline-offset-4: Pushes the underline down slightly for better visual separation.
        - mx-1: Adds a tiny bit of horizontal margin so the background doesn't touch surrounding words.
     */}
-    <span className="text-chill-sage px-2 py-1 rounded-md mx-1 underline decoration-wavy underline-offset-4 decoration-bg-chill-bg"> inline-block">
+    <span className="text-chill-sage px-2 py-1 rounded-md mx-1 underline decoration-wavy underline-offset-4 decoration-chill-bg inline-block">
       Paradise
     </span>
 
