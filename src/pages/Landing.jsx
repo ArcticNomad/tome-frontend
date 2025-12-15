@@ -336,11 +336,8 @@ const App = () => {
       =========================================================================== */}
       <section id="mission" className="bg-chill-surface py-24 px-8 md:px-16 border-t border-white/5">
         <div className="max-w-5xl mx-auto text-center">
-       <div className="mb-8 md:mb-12">
-  {/* Parent H2 holds the main typography styles and keeps children inline */}
-  <h2 className="text-3xl md:text-5xl font-black text-white uppercase leading-tight tracking-tight mb-4 flex flex-wrap items-baseline gap-x-[0.3em]">
-    
-    {/* Part 1: Leading text */}
+          <div className="mb-8 md:mb-12">
+              {/* Part 1: Leading text */}
     <SplitText
       text="I have always imagined that"
       tag="span" // Important: Use span so it stays inline
@@ -371,18 +368,7 @@ const App = () => {
       duration={0.7}
       threshold={0.1}
     />
-  </h2>
-
-  {/* Quote Author */}
-  <SplitText
-    text="— Jorge Luis Borges, The Library of Babel"
-    className="text-gray-400 text-sm font-sans italic"
-    tag="p"
-    splitType="words"
-    // Increased delay slightly to follow the main text block
-    delay={35} 
-  />
-</div>
+          </div>
           <div className="flex flex-col md:flex-row items-start justify-center gap-12 text-left">
             <div className="max-w-sm">
               <div className="w-12 h-1 bg-chill-sage mb-6"></div>
