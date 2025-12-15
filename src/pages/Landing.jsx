@@ -338,7 +338,7 @@ const App = () => {
         <div className="max-w-5xl mx-auto text-center">
        <div className="mb-8 md:mb-12">
   {/* Parent H2 holds the main typography styles and keeps children inline */}
-  <h2 className="text-3xl md:text-5xl font-black text-white uppercase leading-tight tracking-tight mb-4 flex flex-wrap items-baseline gap-x-[0.3em]">
+  <h2 className="text-3xl md:text-5xl font-black text-white uppercase leading-tight tracking-tight mb-4 flex  items-baseline gap-x-[0.3em]">
     
     {/* Part 1: Leading text */}
     <SplitText
@@ -357,7 +357,7 @@ const App = () => {
        - underline-offset-4: Pushes the underline down slightly for better visual separation.
        - mx-1: Adds a tiny bit of horizontal margin so the background doesn't touch surrounding words.
     */}
-    <span className="bg-chill-sage px-2 py-1 rounded-md mx-1 underline decoration-wavy underline-offset-4 decoration-white/80 inline-block">
+    <span className="text-chill-sage px-2 py-1 rounded-md mx-1 underline decoration-wavy underline-offset-4 decoration-white/10 inline-block">
       Paradise
     </span>
 
