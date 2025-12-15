@@ -350,7 +350,7 @@ const App = () => {
               text="— Jorge Luis Borges, The Library of Babel"
               className="text-gray-400 text-sm font-sans italic"
               tag="p"
-              splitType="words"
+              splitType="words" 
               delay={30}
             />
           </div>
