@@ -165,7 +165,7 @@ export const useUserProfile = () => {
     try {
       const token = await getIdToken();
       
-      // ✅ FIXED: Use API_BASE_URL
+      
       const response = await fetch(`${API_BASE_URL}/users/profile`, {
         method: 'PUT',
         headers: {
@@ -192,7 +192,7 @@ export const useUserProfile = () => {
     try {
       const token = await getIdToken();
       
-      // ✅ FIXED: Use API_BASE_URL
+   
       const response = await fetch(`${API_BASE_URL}/users/bookshelves`, {
         method: 'POST',
         headers: {

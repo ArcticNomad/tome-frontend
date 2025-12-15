@@ -14,9 +14,11 @@ const ActivityStatsCard = ({
 }) => {
   
   const genresList = [
-    'Romance', 'Mystery/Thriller', 'Fantasy', 'Science Fiction',
-    'Historical Fiction', 'Biography', 'Self-Help', 'Young Adult'
-  ];
+      'Romance', 'Mystery/Thriller', 'Fantasy', 'Science Fiction', 
+      'Historical Fiction', 'Biography', 'Self-Help', 'Young Adult',
+      'Horror', 'Literary Fiction', 'Poetry', 'Drama', 'Classics',
+      'Non-fiction', 'Comedy', 'Adventure'
+    ]
 
   const handleGenreToggle = (genre) => {
     const currentGenres = editForm.readingPreferences?.favoriteGenres || [];
