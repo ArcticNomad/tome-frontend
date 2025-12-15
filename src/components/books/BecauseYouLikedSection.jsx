@@ -94,7 +94,7 @@ const BecauseYouLikedSection = ({ currentUser }) => {
                                 hover:bg-chill-card/70 transition-all duration-300 self-start sm:self-auto">
                   <div className="w-1.5 h-1.5 bg-chill-sage rounded-full animate-ping"></div>
                   <span className="text-chill-sage text-xs md:text-sm font-semibold tracking-wider uppercase">
-                    {source.replace(/_/g, ' ')}
+                    Trending
                   </span>
                 </div>
               )}
