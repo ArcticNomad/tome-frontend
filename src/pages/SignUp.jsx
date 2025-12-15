@@ -344,14 +344,17 @@ export default function SignUp() {
     console.log('📤 Sending profile data to backend:', profileData);
     console.log('API URL:', `${API_BASE_URL}/users/profile/create`);
     
-    const profileResponse = await fetch(`${API_BASE_URL}/users/profile/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(profileData)
-    });
+   const profileResponse = await fetch(`${API_BASE_URL}/users/profile/create`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    ...profileData,
+    firebaseUid: firebaseUid  // ← ADD THIS LINE!
+  })
+});
     
     console.log('📥 Backend response status:', profileResponse.status);
     console.log('Backend response headers:', Object.fromEntries(profileResponse.headers.entries()));
