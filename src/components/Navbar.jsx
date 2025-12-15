@@ -269,7 +269,7 @@ const Navbar = () => {
               <div className="space-y-3">
                 <button 
                   onClick={() => handleMobileLinkClick('/login')}
-                  className="w-full p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold transition-colors"
+                  className="w-full p-4 rounded-xl bg-white/5 hover:bg-chill-sage border border-white/10 text-white font-semibold transition-colors"
                 >
                   Log In
                 </button>
