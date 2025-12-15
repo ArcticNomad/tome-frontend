@@ -337,37 +337,22 @@ const App = () => {
       <section id="mission" className="bg-chill-surface py-24 px-8 md:px-16 border-t border-white/5">
         <div className="max-w-5xl mx-auto text-center">
           <div className="mb-8 md:mb-12">
-              {/* Part 1: Leading text */}
-    <SplitText
-      text="I have always imagined that"
-      tag="span" // Important: Use span so it stays inline
-      splitType="words"
-      delay={15}
-      duration={0.7}
-      threshold={0.1}
-    />
-
-    {/* Part 2: The highlighted word "Paradise" */}
-    {/* - bg-chill-sage: Sets the background color.
-       - px-2 py-1 rounded-md: Adds padding and rounding for a neat highlight look.
-       - underline decoration-wavy: Adds the wavy underline.
-       - underline-offset-4: Pushes the underline down slightly for better visual separation.
-       - mx-1: Adds a tiny bit of horizontal margin so the background doesn't touch surrounding words.
-    */}
-    <span className="text-chill-sage px-2 py-1 rounded-md mx-1 underline decoration-wavy underline-offset-4 decoration-chill-bg">
-      Paradise
-    </span>
-
-    {/* Part 3: Trailing text */}
-    <SplitText
-      text="will be a kind of library."
-      tag="span" // Important: Use span
-      splitType="words"
-      // Added slightly more delay so it animates after the first part
-      delay={20} 
-      duration={0.7}
-      threshold={0.1}
-    />
+            <SplitText
+              text="I have always imagined that Paradise will be a kind of library."
+              className="text-3xl md:text-5xl font-black text-white uppercase leading-tight tracking-tight mb-4"
+              tag="h2"
+              splitType="words"
+              delay={15}
+              duration={0.7}
+              threshold={0.1}
+            />
+            <SplitText
+              text="— Jorge Luis Borges, The Library of Babel"
+              className="text-gray-400 text-sm font-sans italic"
+              tag="p"
+              splitType="words"
+              delay={30}
+            />
           </div>
           <div className="flex flex-col md:flex-row items-start justify-center gap-12 text-left">
             <div className="max-w-sm">
