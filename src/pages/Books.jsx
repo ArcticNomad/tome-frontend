@@ -1,3 +1,4 @@
+// Books.js - Complete updated code
 import React, { useState } from 'react';
 import HeroSlideshow from '../components/HomePage/HeroSlideshow';
 import BookSection from '../components/HomePage/BookSection';
@@ -20,6 +21,9 @@ import CategoryHighlight from '../components/books/CategoryHighlight';
 import CommunityReviews from '../components/books/CommunityReviews';
 import UserReviewsPrompt from '../components/books/UserReviewsPrompt';
 
+// Import the useBookData hook
+import { useBookData } from '../hooks/useBookData';
+
 function Books() {
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('free');
@@ -32,23 +36,39 @@ function Books() {
     fantasyBooks,
     featuredBooks,
     highlyReviewed,
-    isLoading,
+    isLoading: homepageLoading,
     error,
     backendStatus
   } = useHomepageData();
+
+  // Fetch history books using useBookData hook
+  const { 
+    books: historyBooks, 
+    loading: historyLoading,
+    error: historyError 
+  } = useBookData('history', {
+    limit: 8,
+    autoFetch: true,
+    // If your API uses 'subject' instead of genre, uncomment below:
+    // genre: 'History' 
+  });
 
   // Determine which data to display
   const mainBookList = allBooks.length > 0 ? allBooks : [];
   const limitedBooks = allBooks.length > 0 ? allBooks.slice(0, 18) : [];
 
   // Show loading only if ALL data is loading and we have no books
-  if (isLoading && allBooks.length === 0 && recentlyAdded.length === 0) {
+  if (homepageLoading && allBooks.length === 0 && recentlyAdded.length === 0) {
     return (
       <div className="min-h-screen bg-chill-bg flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
   }
+
+  // If history fetch fails, fallback to popularBooks
+  const displayHistoryBooks = historyBooks.length > 0 ? historyBooks : popularBooks;
+  const isHistoryLoading = historyLoading && !homepageLoading;
 
   return (
     <div className="min-h-screen bg-chill-bg font-sans text-gray-200 selection:bg-chill-sage selection:text-black">
@@ -111,7 +131,7 @@ function Books() {
                 
                 <HorizontalCarousel 
                   books={mainBookList} 
-                  isLoading={isLoading}
+                  isLoading={homepageLoading}
                 />
               </section>
             )}
@@ -119,68 +139,65 @@ function Books() {
             {/* Bento Grid */}
             <section className="relative">
               <div className="relative z-10">
-                <BentoGrid featuredBooks={featuredBooks} isLoading={isLoading} />
+                <BentoGrid featuredBooks={featuredBooks} isLoading={homepageLoading} />
               </div>
             </section>
 
             {/* Recently Added Section */}
             <section className="space-y-6">
               <div className="relative flex items-center gap-5 py-2 group cursor-default">
-  {/* Animated Vertical Bar */}
-  <div className="w-1.5 h-8 bg-[#D4E09B] rounded-full shadow-[0_0_15px_rgba(212,224,155,0.3)] transition-all duration-500 ease-out group-hover:h-12 group-hover:bg-[#EAD2AC] group-hover:shadow-[0_0_20px_rgba(234,210,172,0.4)]" />
-  
-  <div className="relative flex items-center gap-5 py-2 group cursor-default">
-  {/* Animated Vertical Bar */}
- 
-  
-  <div className="flex flex-col">
-    <div className="flex items-center gap-3">
-      <h2 className="text-3xl font-bold text-white tracking-tight group-hover:text-[#EAD2AC] transition-colors duration-300">
-        Recently Added
-      </h2>
-      <Sparkles className="w-5 h-5 text-[#D4E09B] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-out" />
-    </div>
-    
-    {/* Subtitle that reveals on hover */}
-    <span className="text-xs font-medium text-[#9CAFB7] tracking-widest uppercase opacity-0 -translate-y-1 h-0 group-hover:h-auto group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
-      Fresh arrivals this week
-    </span>
-  </div>
-</div>
-</div>
+                {/* Animated Vertical Bar */}
+                <div className="w-1.5 h-8 bg-[#D4E09B] rounded-full shadow-[0_0_15px_rgba(212,224,155,0.3)] transition-all duration-500 ease-out group-hover:h-12 group-hover:bg-[#EAD2AC] group-hover:shadow-[0_0_20px_rgba(234,210,172,0.4)]" />
+                
+                <div className="relative flex items-center gap-5 py-2 group cursor-default">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-3xl font-bold text-white tracking-tight group-hover:text-[#EAD2AC] transition-colors duration-300">
+                        Recently Added
+                      </h2>
+                      <Sparkles className="w-5 h-5 text-[#D4E09B] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-out" />
+                    </div>
+                    
+                    {/* Subtitle that reveals on hover */}
+                    <span className="text-xs font-medium text-[#9CAFB7] tracking-widest uppercase opacity-0 -translate-y-1 h-0 group-hover:h-auto group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
+                      Fresh arrivals this week
+                    </span>
+                  </div>
+                </div>
+              </div>
               
               <HorizontalCarousel 
                 title="New Arrivals" 
                 books={recentlyAdded} 
-                isLoading={isLoading}
+                isLoading={homepageLoading}
               />
             </section>
 
             {/* All Books Collection */}
             <section className="space-y-6">
-            <div className="relative flex items-center gap-5 py-4 group cursor-pointer mb-8">
-  {/* Animated Vertical Bar - Blue Accent */}
-  <div className="w-1.5 h-8 bg-chill-sage rounded-full shadow-[0_0_15px_rgba(156,175,183,0.3)] transition-all duration-500 ease-out group-hover:h-12 group-hover:bg-[#EAD2AC] group-hover:shadow-[0_0_20px_rgba(156,175,183,0.4)]" />
-  
-  <div className="flex flex-col justify-center">
-    <div className="flex items-center gap-3">
-      <h2 className="text-3xl font-bold text-white tracking-tight group-hover:text-chill-sage transition-colors duration-300">
-        Browse All Books
-      </h2>
-      <BookOpen className="w-6 h-6 text-[#9CAFB7] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-out" />
-    </div>
-    
-    {/* Subtitle reveal */}
-    <span className="text-xs font-medium text-[#9CAFB7]/80 tracking-[0.2em] uppercase opacity-0 -translate-y-2 h-0 group-hover:h-auto group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
-      Complete Collection
-    </span>
-  </div>
-</div>
+              <div className="relative flex items-center gap-5 py-4 group cursor-pointer mb-8">
+                {/* Animated Vertical Bar - Blue Accent */}
+                <div className="w-1.5 h-8 bg-chill-sage rounded-full shadow-[0_0_15px_rgba(156,175,183,0.3)] transition-all duration-500 ease-out group-hover:h-12 group-hover:bg-[#EAD2AC] group-hover:shadow-[0_0_20px_rgba(156,175,183,0.4)]" />
+                
+                <div className="flex flex-col justify-center">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-3xl font-bold text-white tracking-tight group-hover:text-chill-sage transition-colors duration-300">
+                      Browse All Books
+                    </h2>
+                    <BookOpen className="w-6 h-6 text-[#9CAFB7] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-out" />
+                  </div>
+                  
+                  {/* Subtitle reveal */}
+                  <span className="text-xs font-medium text-[#9CAFB7]/80 tracking-[0.2em] uppercase opacity-0 -translate-y-2 h-0 group-hover:h-auto group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
+                    Complete Collection
+                  </span>
+                </div>
+              </div>
               
               <BookSection 
                 title="all" 
                 books={limitedBooks} 
-                isLoading={isLoading}
+                isLoading={homepageLoading}
                 showViewAll={mainBookList.length > 18}
               />
             </section>
@@ -193,23 +210,25 @@ function Books() {
               iconLetter="F"
               iconBgColor="bg-chill-lavender"
               books={fantasyBooks}
-              isLoading={isLoading}
+              isLoading={homepageLoading}
               linkTo="/booklists?category=Fantasy"
             />
 
+            {/* History & Culture Category Highlight - UPDATED */}
             <CategoryHighlight 
               title="History & Culture"
               description="Journey through time with our curated selection of historical masterpieces"
               iconLetter="H"
               iconBgColor="bg-chill-sand"
-              books={popularBooks}
-              isLoading={isLoading}
+              books={displayHistoryBooks}
+              isLoading={isHistoryLoading}
               linkTo="/booklists?category=History"
+              fallbackMessage={historyError ? "Showing popular books instead" : ""}
             />
 
             {currentUser && <UserReviewsPrompt />}
             
-            <CommunityReviews books={highlyReviewed} isLoading={isLoading} />
+            <CommunityReviews books={highlyReviewed} isLoading={homepageLoading} />
 
           </div>
         )}
