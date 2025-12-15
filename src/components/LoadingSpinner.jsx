@@ -4,7 +4,7 @@ import {
   Search, BookMarked, TrendingUp, Users, Loader2 
 } from 'lucide-react';
 
-// Custom Color Variables (Same as before)
+// Custom Color Variables
 const COLOR = {
   BG: '#191A19',
   SURFACE: '#2C2C2C',
@@ -15,9 +15,25 @@ const COLOR = {
   BLOB_LIGHT: '#C8B8DB',
 };
 
-/**
- * Main Full-Screen Loading Spinner with dynamic phases and dots
- */
+// Static facts array (defined outside to prevent re-creation)
+const FUN_FACTS = [
+  "The longest novel ever written has over 2 million words.",
+  "Reading for 6 minutes can reduce stress by 68%.",
+  "The world's smallest book measures 0.07 mm × 0.10 mm.",
+  "The smell of old books is caused by cellulose breakdown.",
+  "The first book ever printed was the Gutenberg Bible.",
+  "The term 'bookworm' dates back to the 16th century.",
+  '"Not all those who wander are lost." – J.R.R. Tolkien',
+  '"A reader lives a thousand lives before he dies." – George R.R. Martin',
+  '"It does not do to dwell on dreams and forget to live." – J.K. Rowling',
+  '"Fairy tales are more than true: not because they tell us that dragons exist, but because they tell us that dragons can be beaten." – Neil Gaiman',
+  '"There is no greater agony than bearing an untold story inside you." – Maya Angelou',
+  '"I declare after all there is no enjoyment like reading!" – Jane Austen',
+  '"Until I feared I would lose it, I never loved to read. One does not love breathing." – Harper Lee',
+  '"The more I read, the more I acquire, the more certain I am that I know nothing." – Voltaire',
+  '"Think before you speak. Read before you think." – Fran Lebowitz',
+];
+
 const LoadingSpinner = ({ 
   fullScreen = true, 
   showStatus = true,
@@ -26,28 +42,9 @@ const LoadingSpinner = ({
   const [currentPhase, setCurrentPhase] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
 
-  // Define facts inside component or move outside if static
-  const funFacts = [
-    "The longest novel ever written has over 2 million words.",
-    "Reading for 6 minutes can reduce stress by 68%.",
-    "The world's smallest book measures 0.07 mm × 0.10 mm.",
-    "The smell of old books is caused by cellulose breakdown.",
-    "The first book ever printed was the Gutenberg Bible.",
-    "The term 'bookworm' dates back to the 16th century.",
-    '"Not all those who wander are lost." – J.R.R. Tolkien',
-    '"A reader lives a thousand lives before he dies." – George R.R. Martin',
-    '"It does not do to dwell on dreams and forget to live." – J.K. Rowling',
-    '"Fairy tales are more than true: not because they tell us that dragons exist, but because they tell us that dragons can be beaten." – Neil Gaiman',
-    '"There is no greater agony than bearing an untold story inside you." – Maya Angelou',
-    '"I declare after all there is no enjoyment like reading!" – Jane Austen',
-    '"Until I feared I would lose it, I never loved to read. One does not love breathing." – Harper Lee',
-    '"The more I read, the more I acquire, the more certain I am that I know nothing." – Voltaire',
-    '"Think before you speak. Read before you think." – Fran Lebowitz',
-  ];
-
-  // Initialize with a random index
+  // 1. INITIALIZE WITH RANDOM INDEX
   const [currentFactIndex, setCurrentFactIndex] = useState(() => 
-    Math.floor(Math.random() * funFacts.length)
+    Math.floor(Math.random() * FUN_FACTS.length)
   );
 
   const phases = [
@@ -61,7 +58,6 @@ const LoadingSpinner = ({
   useEffect(() => {
     let phaseTimeoutId;
     let factTimeoutId;
-    let completionTimeoutId;
 
     // Phase cycling logic
     let currentPhaseIndex = 0;
@@ -77,30 +73,31 @@ const LoadingSpinner = ({
     
     phaseTimeoutId = setTimeout(cyclePhases, phases[0].duration);
 
-    // Random Fact cycling logic
+    // 2. RANDOM CYCLING LOGIC
     const cycleFacts = () => {
-      setCurrentFactIndex(prev => {
+      setCurrentFactIndex(prevIndex => {
         let newIndex;
-        // Keep picking a random number until it's different from the previous one
+        // Keep generating a random number until it's different from the current one
         do {
-          newIndex = Math.floor(Math.random() * funFacts.length);
-        } while (newIndex === prev && funFacts.length > 1);
+          newIndex = Math.floor(Math.random() * FUN_FACTS.length);
+        } while (newIndex === prevIndex && FUN_FACTS.length > 1);
         return newIndex;
       });
+      
       factTimeoutId = setTimeout(cycleFacts, 3000);
     };
     
-    factTimeoutId = setTimeout(cycleFacts, 3000); // Wait 3s before first switch
+    // Start cycling facts after 3 seconds
+    factTimeoutId = setTimeout(cycleFacts, 3000);
 
     return () => {
       if (phaseTimeoutId) clearTimeout(phaseTimeoutId);
       if (factTimeoutId) clearTimeout(factTimeoutId);
-      if (completionTimeoutId) clearTimeout(completionTimeoutId);
     };
-  }, [duration, funFacts.length]); // Added dependency for safety
+  }, [duration]);
 
   const CurrentPhaseIcon = phases[currentPhase].icon;
-  const currentFact = funFacts[currentFactIndex];
+  const currentFact = FUN_FACTS[currentFactIndex];
 
   const containerClasses = fullScreen 
     ? "fixed inset-0 z-50 flex flex-col items-center justify-center bg-chill-bg text-white overflow-hidden"
@@ -183,13 +180,13 @@ const LoadingSpinner = ({
               )}
               
               {/* Fun Facts (Randomized) */}
-              <div className="h-8 sm:h-10 overflow-hidden pt-2">
+              <div className="h-12 sm:h-14 overflow-hidden pt-2 px-4">
                 <div 
                   key={currentFactIndex}
-                  className="text-xs sm:text-sm text-gray-400 italic animate-in slide-in-from-bottom-1 fade-in duration-500"
+                  className="text-xs sm:text-sm text-gray-400 italic animate-in slide-in-from-bottom-1 fade-in duration-500 flex items-center justify-center gap-2"
                 >
-                  <Sparkles className="inline-block w-3 h-3 mr-2 text-chill-sage/60" />
-                  {currentFact}
+                  <Sparkles className="flex-shrink-0 w-3 h-3 text-chill-sage/60" />
+                  <span className="line-clamp-2">{currentFact}</span>
                 </div>
               </div>
             </div>
